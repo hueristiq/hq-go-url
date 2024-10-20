@@ -94,6 +94,7 @@ func (e *Extractor) CompileRegex() (regex *regexp.Regexp) {
 
 	// Compiling the final regex pattern.
 	regex = regexp.MustCompile(pattern)
+
 	// Ensures the longest possible match is found.
 	regex.Longest()
 
@@ -123,35 +124,6 @@ const (
 	_IUserInfoPattern         = `(?:(?:[` + _IUnreservedCharacterSet + _subDelimsCharacterSet + `:]|` + _pctEncodingPattern + `)+@)`
 	_IUserInfoOptionalPattern = _IUserInfoPattern + `?`
 
-	ExtractorIPv4Pattern         = `(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])\.(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])\.(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])\.(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])`
-	ExtractorNonEmptyIPv6Pattern = `(?:` +
-		// 7 colon-terminated chomps, followed by a final chomp or the rest of an elision.
-		`(?:[0-9a-fA-F]{1,4}:){7}(?:[0-9a-fA-F]{1,4}|:)|` +
-		// 6 chomps, followed by an IPv4 address or elision with final chomp or final elision.
-		`(?:[0-9a-fA-F]{1,4}:){6}(?:` + ExtractorIPv4Pattern + `|:[0-9a-fA-F]{1,4}|:)|` +
-		// 5 chomps, followed by an elision with optional IPv4 or up to 2 final chomps.
-		`(?:[0-9a-fA-F]{1,4}:){5}(?::` + ExtractorIPv4Pattern + `|(?::[0-9a-fA-F]{1,4}){1,2}|:)|` +
-		// 4 chomps, followed by an elision with optional IPv4 (optionally preceded by a chomp) or
-		// up to 3 final chomps.
-		`(?:[0-9a-fA-F]{1,4}:){4}(?:(?::[0-9a-fA-F]{1,4}){0,1}:` + ExtractorIPv4Pattern + `|(?::[0-9a-fA-F]{1,4}){1,3}|:)|` +
-		// 3 chomps, followed by an elision with optional IPv4 (preceded by up to 2 chomps) or
-		// up to 4 final chomps.
-		`(?:[0-9a-fA-F]{1,4}:){3}(?:(?::[0-9a-fA-F]{1,4}){0,2}:` + ExtractorIPv4Pattern + `|(?::[0-9a-fA-F]{1,4}){1,4}|:)|` +
-		// 2 chomps, followed by an elision with optional IPv4 (preceded by up to 3 chomps) or
-		// up to 5 final chomps.
-		`(?:[0-9a-fA-F]{1,4}:){2}(?:(?::[0-9a-fA-F]{1,4}){0,3}:` + ExtractorIPv4Pattern + `|(?::[0-9a-fA-F]{1,4}){1,5}|:)|` +
-		// 1 chomp, followed by an elision with optional IPv4 (preceded by up to 4 chomps) or
-		// up to 6 final chomps.
-		`(?:[0-9a-fA-F]{1,4}:){1}(?:(?::[0-9a-fA-F]{1,4}){0,4}:` + ExtractorIPv4Pattern + `|(?::[0-9a-fA-F]{1,4}){1,6}|:)|` +
-		// elision, followed by optional IPv4 (preceded by up to 5 chomps) or up to 7 final chomps.
-		// `:` is an intentionally omitted alternative, to avoid matching `::`.
-		`:(?:(?::[0-9a-fA-F]{1,4}){0,5}:` + ExtractorIPv4Pattern + `|(?::[0-9a-fA-F]{1,4}){1,7})` +
-		`)`
-	ExtractorIPv6Pattern = `(?:` + ExtractorNonEmptyIPv6Pattern + `|::)`
-
-	ExtractorPortPattern         = `(?::[0-9]{1,4}|[1-5][0-9]{4}|6[0-5][0-9]{3}\b)`
-	ExtractorPortOptionalPattern = ExtractorPortPattern + `?`
-
 	midIPathSegmentChar = _IUnreservedCharacterSet + `%` + _subDelimsCharacterSet + `:@`
 	endIPathSegmentChar = _IEndUnreservedCharacterSet + `%` + _endSubDelimsCharacterSet
 
@@ -175,31 +147,97 @@ const (
 
 var (
 	// ExtractorSchemePattern defines a general pattern for matching URL schemes.
-	// It matches any scheme that starts with alphabetical characters followed by any combination
-	// of alphabets, dots, hyphens, or pluses, and ends with "://". It also matches any scheme
-	// from a predefined list that does not require authority (host), ending with ":".
+	// It matches any URL scheme that starts with alphabetical characters (a-z, A-Z), followed by
+	// any combination of alphabets, dots (.), hyphens (-), or plus signs (+), and ends with "://".
+	// Additionally, it matches schemes from a predefined list that do not require an authority (host),
+	// ending with just a colon (":"). These are known as "no-authority" schemes (e.g., "mailto:").
+	//
+	// This pattern covers a broad range of schemes, making it versatile for extracting different types
+	// of URLs, whether they require an authority component or not.
 	ExtractorSchemePattern = `(?:[a-zA-Z][a-zA-Z.\-+]*://|` + anyOf(schemes.NoAuthority...) + `:)`
+
 	// ExtractorKnownOfficialSchemePattern defines a pattern for matching officially recognized
-	// URL schemes. This includes schemes like "http", "https", "ftp", etc., and is strictly based
-	// on the schemes defined in the schemes.Schemes slice, ensuring a match ends with "://".
+	// URL schemes. These include well-known schemes such as "http", "https", "ftp", etc., as registered
+	// with IANA. The pattern ensures that the scheme is followed by "://".
+	//
+	// This pattern ensures that only officially recognized schemes are matched.
 	ExtractorKnownOfficialSchemePattern = `(?:` + anyOf(schemes.Official...) + `://)`
-	// ExtractorKnownUnofficialSchemePattern defines a pattern for matching unofficial or
-	// less commonly used URL schemes. Similar to the official pattern but based on the
-	// schemes.SchemesUnofficial slice, it supports schemes that might not be universally recognized
-	// but are valid in specific contexts, ending with "://".
+
+	// ExtractorKnownUnofficialSchemePattern defines a pattern for matching unofficial or less commonly
+	// used URL schemes. These schemes may not be registered with IANA but are still valid in specific contexts,
+	// such as application-specific schemes (e.g., "slack://", "zoommtg://").
+	// The pattern ensures that the scheme is followed by "://".
+	//
+	// This pattern is useful for applications that work with unofficial or niche schemes.
 	ExtractorKnownUnofficialSchemePattern = `(?:` + anyOf(schemes.Unofficial...) + `://)`
-	// ExtractorKnownNoAuthoritySchemePattern defines a pattern for matching schemes that
-	// do not require an authority (host) component. This is useful for schemes like "mailto:",
-	// "tel:", and others where a host is not applicable, ending with ":".
+
+	// ExtractorKnownNoAuthoritySchemePattern defines a pattern for matching URL schemes that
+	// do not require an authority component (host). These schemes are followed by a colon (":") rather than "://".
+	// Examples include "mailto:", "tel:", and "sms:".
+	//
+	// This pattern is used for schemes where a host is not applicable, making it suitable for schemes
+	// that involve direct communication (e.g., email or telephone).
 	ExtractorKnownNoAuthoritySchemePattern = `(?:` + anyOf(schemes.NoAuthority...) + `:)`
-	// ExtractorKnownSchemePattern combines the patterns for officially recognized,
-	// unofficial, and no-authority-required schemes into one comprehensive pattern. It is
-	// case-insensitive (noted by "(?i)") and designed to match a wide range of schemes, accommodating
-	// the broadest possible set of URLs.
+
+	// ExtractorKnownSchemePattern combines the patterns for officially recognized, unofficial,
+	// and no-authority-required schemes into a single comprehensive pattern.
+	// It is case-insensitive (denoted by "(?i)") and matches the broadest possible range of URLs.
+	//
+	// This pattern is suitable for extracting any known scheme, regardless of its official status
+	// or whether it requires an authority component.
 	ExtractorKnownSchemePattern = `(?:(?i)(?:` + anyOf(schemes.Official...) + `|` + anyOf(schemes.Unofficial...) + `)://|` + anyOf(schemes.NoAuthority...) + `:)`
 
-	_ ExtractorInterface = &Extractor{}
+	// ExtractorIPv4Pattern defines a pattern for matching valid IPv4 addresses.
+	// It matches four groups of 1 to 3 digits (0-255) separated by periods (e.g., "192.168.0.1").
+	//
+	// This pattern is essential for extracting or validating IPv4 addresses in URLs or hostnames.
+	ExtractorIPv4Pattern = `(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])\.(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])\.(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])\.(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])`
+
+	// ExtractorNonEmptyIPv6Pattern defines a detailed pattern for matching valid, non-empty IPv6 addresses.
+	// It accounts for various valid formats of IPv6 addresses, including those with elisions ("::") and IPv4
+	// address representations.
+	//
+	// This pattern supports matching fully expanded IPv6 addresses, elided sections, and IPv4-mapped IPv6 addresses.
+	ExtractorNonEmptyIPv6Pattern = `(?:` +
+		// 7 colon-terminated chomps, followed by a final chomp or the rest of an elision.
+		`(?:[0-9a-fA-F]{1,4}:){7}(?:[0-9a-fA-F]{1,4}|:)|` +
+		// 6 chomps, followed by an IPv4 address or elision with final chomp or final elision.
+		`(?:[0-9a-fA-F]{1,4}:){6}(?:` + ExtractorIPv4Pattern + `|:[0-9a-fA-F]{1,4}|:)|` +
+		// 5 chomps, followed by an elision with optional IPv4 or up to 2 final chomps.
+		`(?:[0-9a-fA-F]{1,4}:){5}(?::` + ExtractorIPv4Pattern + `|(?::[0-9a-fA-F]{1,4}){1,2}|:)|` +
+		// 4 chomps, followed by an elision with optional IPv4 (optionally preceded by a chomp) or
+		// up to 3 final chomps.
+		`(?:[0-9a-fA-F]{1,4}:){4}(?:(?::[0-9a-fA-F]{1,4}){0,1}:` + ExtractorIPv4Pattern + `|(?::[0-9a-fA-F]{1,4}){1,3}|:)|` +
+		// 3 chomps, followed by an elision with optional IPv4 (preceded by up to 2 chomps) or
+		// up to 4 final chomps.
+		`(?:[0-9a-fA-F]{1,4}:){3}(?:(?::[0-9a-fA-F]{1,4}){0,2}:` + ExtractorIPv4Pattern + `|(?::[0-9a-fA-F]{1,4}){1,4}|:)|` +
+		// 2 chomps, followed by an elision with optional IPv4 (preceded by up to 3 chomps) or
+		// up to 5 final chomps.
+		`(?:[0-9a-fA-F]{1,4}:){2}(?:(?::[0-9a-fA-F]{1,4}){0,3}:` + ExtractorIPv4Pattern + `|(?::[0-9a-fA-F]{1,4}){1,5}|:)|` +
+		// 1 chomp, followed by an elision with optional IPv4 (preceded by up to 4 chomps) or
+		// up to 6 final chomps.
+		`(?:[0-9a-fA-F]{1,4}:){1}(?:(?::[0-9a-fA-F]{1,4}){0,4}:` + ExtractorIPv4Pattern + `|(?::[0-9a-fA-F]{1,4}){1,6}|:)|` +
+		// elision, followed by optional IPv4 (preceded by up to 5 chomps) or up to 7 final chomps.
+		// `:` is an intentionally omitted alternative, to avoid matching `::`.
+		`:(?:(?::[0-9a-fA-F]{1,4}){0,5}:` + ExtractorIPv4Pattern + `|(?::[0-9a-fA-F]{1,4}){1,7})` +
+		`)`
+
+	// ExtractorIPv6Pattern is a comprehensive pattern that matches both fully expanded and compressed IPv6 addresses.
+	// It also handles "::" elision and optional IPv4-mapped sections.
+	ExtractorIPv6Pattern = `(?:` + ExtractorNonEmptyIPv6Pattern + `|::)`
+
+	// ExtractorPortPattern defines a pattern for matching port numbers in URLs.
+	// It matches valid port numbers (1 to 65535) that are typically found in network addresses.
+	// The port number is preceded by a colon (":").
+	ExtractorPortPattern = `(?::[0-9]{1,4}|[1-5][0-9]{4}|6[0-5][0-9]{3}\b)`
+
+	// ExtractorPortOptionalPattern is similar to ExtractorPortPattern but makes the port number optional.
+	// This is useful for matching URLs where the port may or may not be specified.
+	ExtractorPortOptionalPattern = ExtractorPortPattern + `?`
 )
+
+// Ensure that Extractor implements the ExtractorInterface.
+var _ ExtractorInterface = &Extractor{}
 
 // NewExtractor creates a new Extractor instance with optional configuration.
 // The options can be used to customize how URLs are extracted, such as whether
