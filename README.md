@@ -8,18 +8,23 @@
 
 * [Features](#features)
 * [Usage](#usage)
-    * [URL Extraction](#url-extraction)
-        * [Customizing URL Extraction](#customizing-url-extraction)
-    * [Domain Parsing](#domain-parsingn)
-    * [URL Parsing](#url-parsing)
+	* [Extraction](#extraction)
+		* [Domains](#domains)
+			* [Customizing Domain Extractor](#customizing-domain-extractor)
+		* [URLs](#urls)
+			* [Customizing URL Extractor](#customizing-url-extractor)
+	* [Parsing](#parsing)
+		* [Domains](#domains)
+		* [URLs](#urls)
 * [Contributing](#contributing)
 * [Licensing](#licensing)
 * [Credits](#credits)
-    * [Contributors](#contributors)
-    * [Similar Projects](#similar-projects)
+	* [Contributors](#contributors)
+	* [Similar Projects](#similar-projects)
 
 ## Features
 
+* **Flexible Domain Extraction:** Extract domains from text using regular expressions.
 * **Flexible URL Extraction:** Extract URLs from text using regular expressions.
 * **Domain Parsing:** Parse domains into subdomains, root domains, and top-level domains (TLDs).
 * **Extended URL Parsing:** Extend the standard `net/url` package in Go with additional fields and capabilities.
@@ -38,7 +43,60 @@ This command will download and install the `hq-go-url` package into your Go work
 
 Below are examples demonstrating how to use the different features of the `hq-go-url` package.
 
-### URL Extraction
+### Extraction
+
+> [!NOTE]
+> Since Extraction API is centered around [regexp.Regexp](https://golang.org/pkg/regexp/#Regexp), many other methods are available
+
+#### Domains
+
+You can extract domains from a given text string using the Extractor. Here's a simple example:
+
+```go
+package main
+
+import (
+	"fmt"
+	hqgourl "github.com/hueristiq/hq-go-url"
+	"regexp"
+)
+
+func main() {
+	extractor := hqgourl.NewDomainExtractor()
+	text := "Check out this website: https://example.com and send an email to info@example.com."
+
+	regex := extractor.CompileRegex()
+	matches := regex.FindAllString(text, -1)
+
+	fmt.Println("Found Domain:", matches)
+}
+```
+
+##### Customizing Domain Extractor
+
+You can customize how domains are extracted by specifying URL schemes, hosts, or providing custom regular expression patterns.
+
+* Extract domains with TLD Pattern:
+
+	```go
+	extractor := hqgourl.NewDomainExtractor(
+		hqgourl.DomainExtractorWithTLDPattern(`(?:com|net|org)`),
+	)
+	```
+
+	This configuration will extract only domains with `com`, `net`, or `org` TLDs.
+
+* Extract domains with Root Domain Pattern:
+
+	```go
+	extractor := hqgourl.NewDomainExtractor(
+		hqgourl.DomainExtractorWithRootDomainPattern(`(?:example|rootdomain)`), // Custom root domain pattern
+	)
+	```
+
+	This configuration will extract domains that have `example` or `rootdomain` root domain.
+
+#### URLs
 
 You can extract URLs from a given text string using the Extractor. Here's a simple example:
 
@@ -46,51 +104,50 @@ You can extract URLs from a given text string using the Extractor. Here's a simp
 package main
 
 import (
-    "fmt"
-    hqgourl "github.com/hueristiq/hq-go-url"
-    "regexp"
+	"fmt"
+	hqgourl "github.com/hueristiq/hq-go-url"
+	"regexp"
 )
 
 func main() {
-    extr := hqgourl.NewExtractor()
-    text := "Check out this website: https://example.com and send an email to info@example.com."
-    
-    regex := extr.CompileRegex()
-    matches := regex.FindAllString(text, -1)
-    
-    fmt.Println("Found URLs:", matches)
+	extractor := hqgourl.NewExtractor()
+	text := "Check out this website: https://example.com and send an email to info@example.com."
+
+	regex := extractor.CompileRegex()
+	matches := regex.FindAllString(text, -1)
+
+	fmt.Println("Found URLs:", matches)
 }
 ```
 
-#### Customizing URL Extraction
+##### Customizing URL Extractor
 
 You can customize how URLs are extracted by specifying URL schemes, hosts, or providing custom regular expression patterns.
 
-* Extract URLs with Specific Schemes (e.g., HTTP, HTTPS, FTP):
+* Extract URLs with Schemes Pattern:
 
-    ```go
-    extr := hqgourl.NewExtractor(
-        hqgourl.ExtractorWithSchemePattern(`(?:https?|ftp)://`),
-    )
-    ```
+	```go
+	extractor := hqgourl.NewExtractor(
+		hqgourl.ExtractorWithSchemePattern(`(?:https?|ftp)://`),
+	)
+	```
 
-    This configuration will extract only URLs starting with http, https, or ftp schemes.
+	This configuration will extract URLs with `http`, `https`, or `ftp` schemes.
 
-* Extract URLs with Custom Host Patterns (e.g., example.com):
+* Extract URLs with Host Pattern:
 
-    ```go
-    extr := hqgourl.NewExtractor(
-        hqgourl.ExtractorWithHostPattern(`(?:www\.)?example\.com`),
-    )
+	```go
+	extractor := hqgourl.NewExtractor(
+		hqgourl.ExtractorWithHostPattern(`(?:www\.)?example\.com`),
+	)
 
-    ```
+	```
 
-    This setup will extract URLs that have hosts matching www.example.com or example.com.
+	This configuration will extract URLs that have hosts matching `www.example.com` or `example.com`.
 
-> [!NOTE]
-> Since API is centered around [regexp.Regexp](https://golang.org/pkg/regexp/#Regexp), many other methods are available
+### Parsing
 
-### Domain Parsing
+#### Domains
 
 The `DomainParser` can parse domains into their components, such as subdomains, root domains, and TLDs:
 
@@ -98,20 +155,20 @@ The `DomainParser` can parse domains into their components, such as subdomains, 
 package main
 
 import (
-    "fmt"
-    hqgourl "github.com/hueristiq/hq-go-url"
+	"fmt"
+	hqgourl "github.com/hueristiq/hq-go-url"
 )
 
 func main() {
-    dp := hqgourl.NewDomainParser()
+	dp := hqgourl.NewDomainParser()
 
-    parsedDomain := dp.Parse("subdomain.example.com")
+	parsedDomain := dp.Parse("subdomain.example.com")
 
-    fmt.Printf("Subdomain: %s, Root Domain: %s, TLD: %s\n", parsedDomain.Sub, parsedDomain.Root, parsedDomain.TopLevel)
+	fmt.Printf("Subdomain: %s, Root Domain: %s, TLD: %s\n", parsedDomain.Sub, parsedDomain.Root, parsedDomain.TopLevel)
 }
 ```
 
-### URL Parsing
+#### URLs
 
 The `Parser` provides an extended way to parse URLs, including additional fields like port and file extension:
 
@@ -119,25 +176,25 @@ The `Parser` provides an extended way to parse URLs, including additional fields
 package main
 
 import (
-    "fmt"
-    hqgourl "github.com/hueristiq/hq-go-url"
+	"fmt"
+	hqgourl "github.com/hueristiq/hq-go-url"
 )
 
 func main() {
-    up := hqgourl.NewParser()
+	up := hqgourl.NewParser()
 
-    parsedURL, err := up.Parse("https://subdomain.example.com:8080/path/file.txt")
-    if err != nil {
-        fmt.Println("Error parsing URL:", err)
+	parsedURL, err := up.Parse("https://subdomain.example.com:8080/path/file.txt")
+	if err != nil {
+		fmt.Println("Error parsing URL:", err)
 
-        return
-    }
+		return
+	}
 
-    fmt.Printf("Subdomain: %s\n", parsedURL.Domain.Sub)
-    fmt.Printf("Root Domain: %s\n", parsedURL.Domain.Root)
-    fmt.Printf("TLD: %s\n", parsedURL.Domain.TopLevel)
-    fmt.Printf("Port: %d\n", parsedURL.Port)
-    fmt.Printf("File Extension: %s\n", parsedURL.Extension)
+	fmt.Printf("Subdomain: %s\n", parsedURL.Domain.Sub)
+	fmt.Printf("Root Domain: %s\n", parsedURL.Domain.Root)
+	fmt.Printf("TLD: %s\n", parsedURL.Domain.TopLevel)
+	fmt.Printf("Port: %d\n", parsedURL.Port)
+	fmt.Printf("File Extension: %s\n", parsedURL.Extension)
 }
 ```
 
