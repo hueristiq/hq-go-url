@@ -11,26 +11,29 @@ import (
 )
 
 // Extractor is a struct that configures the URL extraction process.
-// It allows specifying whether to include URL schemes and hosts in the extraction and supports
-// custom regex patterns for these components.
+// It provides options for controlling whether URL schemes and hosts are mandatory,
+// and allows custom regular expression patterns to be specified for these components.
+// This allows fine-grained control over the types of URLs that are extracted from text.
 type Extractor struct {
-	withScheme        bool   // Indicates if the scheme part is mandatory in the URLs to be extracted.
-	withSchemePattern string // Custom regex pattern for matching URL schemes, if provided.
-	withHost          bool   // Indicates if the host part is mandatory in the URLs to be extracted.
-	withHostPattern   string // Custom regex pattern for matching URL hosts, if provided.
+	withScheme        bool   // Specifies if a scheme (e.g., http) is mandatory in extracted URLs.
+	withSchemePattern string // A custom regex pattern for matching URL schemes (optional).
+	withHost          bool   // Specifies if a host (e.g., domain) is mandatory in extracted URLs.
+	withHostPattern   string // A custom regex pattern for matching URL hosts (optional).
 }
 
-// CompileRegex compiles a regex pattern based on the Extractor configuration.
-// It dynamically constructs a regex pattern to accurately capture URLs from text,
-// supporting various URL formats and components. The method ensures the regex captures
-// the longest possible match for a URL, enhancing the accuracy of the extraction process.
+// CompileRegex constructs and compiles a regular expression based on the Extractor configuration.
+// It builds a regex pattern that can capture various forms of URLs, including those with or without
+// schemes and hosts. The method also supports custom patterns provided by the user, ensuring that the
+// longest possible match for a URL is found, improving accuracy in URL extraction.
 func (e *Extractor) CompileRegex() (regex *regexp.Regexp) {
+	// Set the default scheme pattern or use the user-specified one.
 	schemePattern := ExtractorSchemePattern
 
 	if e.withScheme && e.withSchemePattern != "" {
 		schemePattern = e.withSchemePattern
 	}
 
+	// Separate ASCII TLDs from Unicode TLDs for the regular expression.
 	var asciiTLDs, unicodeTLDs []string
 
 	for i, tld := range tlds.Official {
@@ -42,10 +45,12 @@ func (e *Extractor) CompileRegex() (regex *regexp.Regexp) {
 		}
 	}
 
+	// Define regular expression components for known TLDs and domains.
 	punycode := `xn--[a-z0-9-]+`
 	knownTLDPattern := `(?:(?i)` + punycode + `|` + anyOf(append(asciiTLDs, tlds.Pseudo...)...) + `\b|` + anyOf(unicodeTLDs...) + `)`
 	domainPattern := `(?:` + _subdomainPattern + knownTLDPattern + `|localhost)`
 
+	// Host and authority patterns for matching URLs with optional ports.
 	hostWithoutPortPattern := `(?:` + domainPattern + `|\[` + ExtractorIPv6Pattern + `\]|\b` + ExtractorIPv4Pattern + `\b)`
 	hostWithPortOptionalPattern := `(?:` + hostWithoutPortPattern + ExtractorPortOptionalPattern + `)`
 
@@ -53,9 +58,11 @@ func (e *Extractor) CompileRegex() (regex *regexp.Regexp) {
 		hostWithPortOptionalPattern = e.withHostPattern
 	}
 
+	// Authority patterns for matching URLs with optional user info and host.
 	_IAuthorityPattern := `(?:` + _IUserInfoOptionalPattern + hostWithPortOptionalPattern + `)`
 	_IAuthorityOptionalPattern := _IAuthorityPattern + `?`
 
+	// Define patterns for different types of URLs.
 	webURL := _IAuthorityPattern + `(?:/` + pathCont + `|/)?`
 
 	// Emails pattern.
@@ -63,14 +70,17 @@ func (e *Extractor) CompileRegex() (regex *regexp.Regexp) {
 
 	URLsWithSchemePattern := schemePattern + _IAuthorityOptionalPattern + pathCont
 
+	// If custom host pattern is provided, prioritize it.
 	if e.withHostPattern != "" {
 		URLsWithSchemePattern = schemePattern + _IAuthorityPattern + `(?:/` + pathCont + `|/)?`
 	}
 
+	// Combine various URL matching patterns for full URL extraction.
 	URLsWithHostPattern := webURL + `|` + email
 
 	RelativeURLsPattern := `(\/[\w\/?=&#.-]*)|([\w\/?=&#.-]+?(?:\/[\w\/?=&#.-]+)+)`
 
+	// Select the final pattern based on the configuration.
 	var pattern string
 
 	switch {
@@ -91,10 +101,12 @@ func (e *Extractor) CompileRegex() (regex *regexp.Regexp) {
 }
 
 // ExtractorOptionsFunc defines a function type for configuring Extractor instances.
-// This approach allows for flexible and fluent configuration of the extractor.
+// It allows users to pass options that modify the behavior of the Extractor, such as whether
+// to include schemes or hosts in URL extraction.
 type ExtractorOptionsFunc func(*Extractor)
 
-// ExtractorInterface defines the interface for Extractor, ensuring it implements certain methods.
+// ExtractorInterface defines the interface that Extractor should implement.
+// It ensures that Extractor has the ability to compile regex patterns for URL extraction.
 type ExtractorInterface interface {
 	CompileRegex() (regex *regexp.Regexp)
 }
@@ -190,7 +202,8 @@ var (
 )
 
 // NewExtractor creates a new Extractor instance with optional configuration.
-// It applies the provided options to the extractor, allowing for customized behavior.
+// The options can be used to customize how URLs are extracted, such as whether
+// to include URL schemes or hosts.
 func NewExtractor(opts ...ExtractorOptionsFunc) (extractor *Extractor) {
 	extractor = &Extractor{}
 
@@ -201,15 +214,16 @@ func NewExtractor(opts ...ExtractorOptionsFunc) (extractor *Extractor) {
 	return
 }
 
-// ExtractorWithScheme returns an option function to include URL schemes in the extraction process.
+// ExtractorWithScheme returns an option function that configures the Extractor
+// to require URL schemes in the extraction process.
 func ExtractorWithScheme() ExtractorOptionsFunc {
 	return func(e *Extractor) {
 		e.withScheme = true
 	}
 }
 
-// ExtractorWithSchemePattern returns an option function to specify a custom regex pattern
-// for matching URL schemes. This allows for fine-tuned control over which schemes are considered valid.
+// ExtractorWithSchemePattern returns an option function that allows specifying
+// a custom regex pattern for matching URL schemes.
 func ExtractorWithSchemePattern(pattern string) ExtractorOptionsFunc {
 	return func(e *Extractor) {
 		e.withScheme = true
@@ -217,16 +231,16 @@ func ExtractorWithSchemePattern(pattern string) ExtractorOptionsFunc {
 	}
 }
 
-// ExtractorWithHost returns an option function to include hosts in the URLs to be extracted.
-// This can be used to ensure that only URLs with specified host components are captured.
+// ExtractorWithHost returns an option function that configures the Extractor
+// to require URL hosts in the extraction process.
 func ExtractorWithHost() ExtractorOptionsFunc {
 	return func(e *Extractor) {
 		e.withHost = true
 	}
 }
 
-// ExtractorWithHostPattern returns an option function to specify a custom regex pattern
-// for matching URL hosts. This is useful for targeting specific domain names or IP address formats.
+// ExtractorWithHostPattern returns an option function that allows specifying
+// a custom regex pattern for matching URL hosts.
 func ExtractorWithHostPattern(pattern string) ExtractorOptionsFunc {
 	return func(e *Extractor) {
 		e.withHost = true
@@ -234,8 +248,9 @@ func ExtractorWithHostPattern(pattern string) ExtractorOptionsFunc {
 	}
 }
 
-// anyOf is a helper function that constructs a regex pattern for a set of strings.
-// It simplifies the creation of regex patterns by automatically escaping and joining the provided strings.
+// anyOf is a helper function that constructs a regex pattern from a list of strings.
+// It joins the provided strings into a single regular expression, ensuring that
+// each string is properly escaped for use in regex matching.
 func anyOf(strs ...string) string {
 	var b strings.Builder
 
