@@ -19,15 +19,9 @@ type Parser struct {
 	dp *DomainParser // DomainParser is used for extracting domain-specific details.
 }
 
-// WithDefaultScheme sets the default scheme for the Parser, such as "http" or "https".
-// This scheme will be applied to URLs that do not include a scheme when they are parsed.
-func (up *Parser) WithDefaultScheme(scheme string) {
-	ParserWithDefaultScheme(scheme)(up)
-}
-
 // DefaultScheme returns the currently set default scheme for the Parser.
 // This is useful for checking what scheme will be added to URLs that do not specify one.
-func (up *Parser) DefaultScheme() (scheme string) {
+func (up *Parser) GetDefaultScheme() (scheme string) {
 	return up.scheme
 }
 
@@ -37,10 +31,10 @@ func (up *Parser) DefaultScheme() (scheme string) {
 // is added. The method also handles splitting the host and port if they are specified.
 //
 // Returns:
-//   - parsedURL: A pointer to the parsed URL, containing all its components.
+//   - parsed: A pointer to the parsed URL, containing all its components.
 //   - err: An error if the URL is invalid or cannot be parsed.
-func (up *Parser) Parse(rawURL string) (parsedURL *URL, err error) {
-	parsedURL = &URL{}
+func (up *Parser) Parse(rawURL string) (parsed *URL, err error) {
+	parsed = &URL{}
 
 	// Add default scheme if necessary
 	if up.scheme != "" {
@@ -48,7 +42,7 @@ func (up *Parser) Parse(rawURL string) (parsedURL *URL, err error) {
 	}
 
 	// Standard URL parsing
-	parsedURL.URL, err = url.Parse(rawURL)
+	parsed.URL, err = url.Parse(rawURL)
 	if err != nil {
 		err = fmt.Errorf("error parsing URL: %w", err)
 
@@ -56,7 +50,7 @@ func (up *Parser) Parse(rawURL string) (parsedURL *URL, err error) {
 	}
 
 	// Split host and port, and handle errors
-	parsedURL.Host, parsedURL.Port, err = splitHostPort(parsedURL.Host)
+	parsed.Host, parsed.Port, err = splitHostPort(parsed.Host)
 	if err != nil {
 		err = fmt.Errorf("error splitting host and port: %w", err)
 
@@ -65,12 +59,12 @@ func (up *Parser) Parse(rawURL string) (parsedURL *URL, err error) {
 
 	domainRegex := regexp.MustCompile(`(?i)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}`)
 
-	if domainRegex.MatchString(parsedURL.Host) {
-		parsedURL.Domain = up.dp.Parse(parsedURL.Host)
+	if domainRegex.MatchString(parsed.Host) {
+		parsed.Domain = up.dp.Parse(parsed.Host)
 	}
 
 	// Extract file extension from the path
-	parsedURL.Extension = path.Ext(parsedURL.Path)
+	parsed.Extension = path.Ext(parsed.Path)
 
 	return
 }
@@ -82,9 +76,8 @@ type ParserOptionsFunc func(*Parser)
 // ParserInterface defines the interface for URL parsing functionality.
 // It ensures that any Parser implementation can set default schemes and parse URLs.
 type ParserInterface interface {
-	WithDefaultScheme(scheme string)                 // Set the default scheme.
-	DefaultScheme() (scheme string)                  // Get the default scheme.
-	Parse(rawURL string) (parsedURL *URL, err error) // Parse a raw URL string into a URL struct.
+	Parse(rawURL string) (parsed *URL, err error) // Parse a raw URL string into a URL struct.
+	GetDefaultScheme() (scheme string)            // Get the default scheme.
 }
 
 // Ensure that Parser implements the ParserInterface.
@@ -101,6 +94,7 @@ func NewParser(opts ...ParserOptionsFunc) (up *Parser) {
 
 	// Initialize the DomainParser for domain-specific parsing.
 	dp := NewDomainParser()
+
 	up.dp = dp
 
 	// Apply any additional options provided to configure the Parser.

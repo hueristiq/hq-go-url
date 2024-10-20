@@ -26,7 +26,7 @@ func TestNewParser(t *testing.T) {
 		t.Errorf("NewParser(ParserWithDefaultScheme(%s)) = nil; want non-nil", scheme)
 	}
 
-	expectedDefaultScheme := parserWithDefaultScheme.DefaultScheme()
+	expectedDefaultScheme := parserWithDefaultScheme.GetDefaultScheme()
 
 	if expectedDefaultScheme != scheme {
 		t.Errorf("NewParser(ParserWithDefaultScheme(%s)).DefaultScheme() = '%s', want '%s'", scheme, expectedDefaultScheme, scheme)
