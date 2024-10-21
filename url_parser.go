@@ -21,8 +21,8 @@ type Parser struct {
 
 // DefaultScheme returns the currently set default scheme for the Parser.
 // This is useful for checking what scheme will be added to URLs that do not specify one.
-func (up *Parser) GetDefaultScheme() (scheme string) {
-	return up.scheme
+func (p *Parser) GetDefaultScheme() (scheme string) {
+	return p.scheme
 }
 
 // Parse takes a raw URL string and parses it into a custom URL struct.
@@ -33,16 +33,16 @@ func (up *Parser) GetDefaultScheme() (scheme string) {
 // Returns:
 //   - parsed: A pointer to the parsed URL, containing all its components.
 //   - err: An error if the URL is invalid or cannot be parsed.
-func (up *Parser) Parse(rawURL string) (parsed *URL, err error) {
+func (p *Parser) Parse(unparsed string) (parsed *URL, err error) {
 	parsed = &URL{}
 
 	// Add default scheme if necessary
-	if up.scheme != "" {
-		rawURL = addScheme(rawURL, up.scheme)
+	if p.scheme != "" {
+		unparsed = addScheme(unparsed, p.scheme)
 	}
 
 	// Standard URL parsing
-	parsed.URL, err = url.Parse(rawURL)
+	parsed.URL, err = url.Parse(unparsed)
 	if err != nil {
 		err = fmt.Errorf("error parsing URL: %w", err)
 
@@ -60,7 +60,7 @@ func (up *Parser) Parse(rawURL string) (parsed *URL, err error) {
 	domainRegex := regexp.MustCompile(`(?i)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}`)
 
 	if domainRegex.MatchString(parsed.Host) {
-		parsed.Domain = up.dp.Parse(parsed.Host)
+		parsed.Domain = p.dp.Parse(parsed.Host)
 	}
 
 	// Extract file extension from the path
@@ -69,43 +69,43 @@ func (up *Parser) Parse(rawURL string) (parsed *URL, err error) {
 	return
 }
 
-// ParserOptionsFunc defines a function type for configuring a Parser instance.
+// ParserOptionFunc defines a function type for configuring a Parser instance.
 // This allows setting options such as the default scheme or custom domain parsing logic.
-type ParserOptionsFunc func(*Parser)
+type ParserOptionFunc func(*Parser)
 
 // ParserInterface defines the interface for URL parsing functionality.
 // It ensures that any Parser implementation can set default schemes and parse URLs.
 type ParserInterface interface {
-	Parse(rawURL string) (parsed *URL, err error) // Parse a raw URL string into a URL struct.
-	GetDefaultScheme() (scheme string)            // Get the default scheme.
+	Parse(unparsed string) (parsed *URL, err error) // Parse a raw URL string into a URL struct.
+	GetDefaultScheme() (scheme string)              // Get the default scheme.
 }
 
 // Ensure that Parser implements the ParserInterface.
 var _ ParserInterface = &Parser{}
 
 // NewParser creates and initializes a new Parser with the given options.
-// It also sets up a DomainParser for extracting domain-specific details (subdomain, root domain, and TLD).
+// It also sets a DomainParser for extracting domain-specific details (subdomain, root domain, and TLD).
 // Additional configuration options can be applied using the variadic opts parameter.
 //
 // Returns:
-//   - up: A pointer to the initialized Parser.
-func NewParser(opts ...ParserOptionsFunc) (up *Parser) {
-	up = &Parser{}
+//   - parser: A pointer to the initialized Parser.
+func NewParser(opts ...ParserOptionFunc) (parser *Parser) {
+	parser = &Parser{}
 
 	// Initialize the DomainParser for domain-specific parsing.
 	dp := NewDomainParser()
 
-	up.dp = dp
+	parser.dp = dp
 
 	// Apply any additional options provided to configure the Parser.
 	for _, opt := range opts {
-		opt(up)
+		opt(parser)
 	}
 
 	return
 }
 
-// ParserWithDefaultScheme returns a ParserOptionsFunc that sets the default scheme for the Parser.
+// ParserWithDefaultScheme returns a ParserOptionFunc that sets the default scheme for the Parser.
 // This function allows you to specify a scheme that will be used for URLs that don't provide one.
 //
 // Parameters:
@@ -113,9 +113,9 @@ func NewParser(opts ...ParserOptionsFunc) (up *Parser) {
 //
 // Returns:
 //   - A function that applies the default scheme to the Parser.
-func ParserWithDefaultScheme(scheme string) ParserOptionsFunc {
-	return func(up *Parser) {
-		up.scheme = scheme
+func ParserWithDefaultScheme(scheme string) ParserOptionFunc {
+	return func(p *Parser) {
+		p.scheme = scheme
 	}
 }
 
