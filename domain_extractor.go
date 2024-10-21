@@ -66,9 +66,9 @@ func (e *DomainExtractor) CompileRegex() (regex *regexp.Regexp) {
 	return
 }
 
-// DomainExtractorOptionsFunc defines a function type for configuring a DomainExtractor.
+// DomainExtractorOptionFunc defines a function type for configuring a DomainExtractor.
 // It allows setting options like custom patterns for root domains and TLDs.
-type DomainExtractorOptionsFunc func(*DomainExtractor)
+type DomainExtractorOptionFunc func(*DomainExtractor)
 
 // DomainExtractorInterface defines the interface for domain extraction functionality.
 // It ensures that any domain extractor can compile regular expressions to match domain names.
@@ -85,7 +85,7 @@ var _ DomainExtractorInterface = &DomainExtractor{}
 //
 // Returns:
 //   - extractor: A pointer to the initialized DomainExtractor.
-func NewDomainExtractor(opts ...DomainExtractorOptionsFunc) (extractor *DomainExtractor) {
+func NewDomainExtractor(opts ...DomainExtractorOptionFunc) (extractor *DomainExtractor) {
 	extractor = &DomainExtractor{}
 
 	// Apply any provided options to customize the extractor.
@@ -104,7 +104,7 @@ func NewDomainExtractor(opts ...DomainExtractorOptionsFunc) (extractor *DomainEx
 //
 // Returns:
 //   - A function that applies the custom root domain pattern to the DomainExtractor.
-func DomainExtractorWithRootDomainPattern(pattern string) DomainExtractorOptionsFunc {
+func DomainExtractorWithRootDomainPattern(pattern string) DomainExtractorOptionFunc {
 	return func(e *DomainExtractor) {
 		e.RootDomainPattern = pattern
 	}
@@ -118,7 +118,7 @@ func DomainExtractorWithRootDomainPattern(pattern string) DomainExtractorOptions
 //
 // Returns:
 //   - A function that applies the custom TLD pattern to the DomainExtractor.
-func DomainExtractorWithTLDPattern(pattern string) DomainExtractorOptionsFunc {
+func DomainExtractorWithTLDPattern(pattern string) DomainExtractorOptionFunc {
 	return func(e *DomainExtractor) {
 		e.TopLevelDomainPattern = pattern
 	}

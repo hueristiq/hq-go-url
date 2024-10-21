@@ -21,8 +21,7 @@ type Domain struct {
 //
 // Example:
 //
-//	If Sub = "www", Root = "example", and TopLevel = "com",
-//	the output will be "www.example.com".
+//	If Sub = "www", Root = "example", and TopLevel = "com", the output will be "www.example.com".
 func (d *Domain) String() (domain string) {
 	var parts []string
 
@@ -47,7 +46,7 @@ func (d *Domain) String() (domain string) {
 	return
 }
 
-// DomainInterface defines an interface for domain representations. It ensures that any domain struct
+// DomainInterface defines an interface for Domain representations. It ensures that any Domain struct
 // can implement the String method to convert the domain structure back into a string form.
 type DomainInterface interface {
 	String() (domain string) // Converts the domain components back into a full domain name.

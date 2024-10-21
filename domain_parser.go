@@ -21,7 +21,7 @@ type DomainParser struct {
 //
 // Returns:
 //   - parsed: A pointer to a Domain struct containing the subdomain, root domain, and TLD.
-func (dp *DomainParser) Parse(domain string) (parsed *Domain) {
+func (p *DomainParser) Parse(domain string) (parsed *Domain) {
 	parsed = &Domain{}
 
 	// Split the domain into parts based on the '.' character.
@@ -35,7 +35,7 @@ func (dp *DomainParser) Parse(domain string) (parsed *Domain) {
 	}
 
 	// Use the findTLDOffset method to determine where the TLD begins in the domain parts.
-	TLDOffset := dp.findTLDOffset(parts)
+	TLDOffset := p.findTLDOffset(parts)
 
 	// If no valid TLD is found, treat the entire domain as the root.
 	if TLDOffset < 0 {
@@ -61,7 +61,7 @@ func (dp *DomainParser) Parse(domain string) (parsed *Domain) {
 //
 // Returns:
 //   - offset: The index of the last part that is the root domain, or -1 if no valid TLD is found.
-func (dp *DomainParser) findTLDOffset(parts []string) (offset int) {
+func (p *DomainParser) findTLDOffset(parts []string) (offset int) {
 	offset = -1
 
 	partsLength := len(parts)
@@ -73,7 +73,7 @@ func (dp *DomainParser) findTLDOffset(parts []string) (offset int) {
 		TLD := strings.Join(parts[i:], ".")
 
 		// Search for the TLD in the suffix array.
-		indices := dp.sa.Lookup([]byte(TLD), -1)
+		indices := p.sa.Lookup([]byte(TLD), -1)
 
 		// If a valid TLD is found, update the offset to the position before the TLD starts.
 		if len(indices) > 0 {
@@ -95,9 +95,9 @@ type DomainParserInterface interface {
 	findTLDOffset(parts []string) (offset int) // Find the TLD offset in the domain parts.
 }
 
-// DomainParserOptionsFunc defines a function type for configuring a DomainParser instance.
+// DomainParserOptionFunc defines a function type for configuring a DomainParser instance.
 // It is used to apply customization options, such as specifying custom TLDs.
-type DomainParserOptionsFunc func(*DomainParser)
+type DomainParserOptionFunc func(*DomainParser)
 
 // Ensure type compatibility with the interface.
 // This ensures that DomainParser structs correctly implement the required interface.
@@ -108,9 +108,9 @@ var _ DomainParserInterface = &DomainParser{}
 // passed to customize the parser, such as using a custom set of TLDs.
 //
 // Returns:
-//   - dp: A pointer to the initialized DomainParser.
-func NewDomainParser(opts ...DomainParserOptionsFunc) (dp *DomainParser) {
-	dp = &DomainParser{}
+//   - parser: A pointer to the initialized DomainParser.
+func NewDomainParser(opts ...DomainParserOptionFunc) (parser *DomainParser) {
+	parser = &DomainParser{}
 
 	// Combine standard and pseudo-TLDs for comprehensive coverage.
 	TLDs := []string{}
@@ -119,11 +119,11 @@ func NewDomainParser(opts ...DomainParserOptionsFunc) (dp *DomainParser) {
 	TLDs = append(TLDs, tlds.Pseudo...)
 
 	// Initialize the suffix array with TLD data.
-	dp.sa = suffixarray.New([]byte("\x00" + strings.Join(TLDs, "\x00") + "\x00"))
+	parser.sa = suffixarray.New([]byte("\x00" + strings.Join(TLDs, "\x00") + "\x00"))
 
 	// Apply any additional options
 	for _, opt := range opts {
-		opt(dp)
+		opt(parser)
 	}
 
 	return
@@ -137,9 +137,9 @@ func NewDomainParser(opts ...DomainParserOptionsFunc) (dp *DomainParser) {
 //   - TLDs: A slice of custom TLDs to be used by the DomainParser.
 //
 // Returns:
-//   - A DomainParserOptionsFunc that applies the custom TLDs to the parser.
-func DomainParserWithTLDs(TLDs ...string) DomainParserOptionsFunc {
-	return func(dp *DomainParser) {
-		dp.sa = suffixarray.New([]byte("\x00" + strings.Join(TLDs, "\x00") + "\x00"))
+//   - A DomainParserOptionFunc that applies the custom TLDs to the parser.
+func DomainParserWithTLDs(TLDs ...string) DomainParserOptionFunc {
+	return func(p *DomainParser) {
+		p.sa = suffixarray.New([]byte("\x00" + strings.Join(TLDs, "\x00") + "\x00"))
 	}
 }
