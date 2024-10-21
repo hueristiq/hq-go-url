@@ -8,74 +8,87 @@ import (
 )
 
 // DomainParser is responsible for parsing domain names into their constituent parts: subdomain,
-// root domain, and top-level domain (TLD). It uses a suffix array to efficiently identify the TLDs
-// and extract the subdomain and root domain from the full domain string. The suffix array allows
-// for fast lookups, even for large sets of known TLDs.
+// root domain (SLD), and top-level domain (TLD). It utilizes a suffix array to efficiently identify TLDs
+// from a comprehensive list of known TLDs (both standard and pseudo-TLDs). This allows the parser to split
+// the domain into subdomain, root domain, and TLD components quickly and accurately.
+//
+// The suffix array helps in handling a large number of known TLDs and enables fast lookups, even for complex
+// domain structures where subdomains might be mistaken for TLDs.
+//
+// Fields:
+//   - sa (*suffixarray.Index):
+//   - The suffix array index used for efficiently searching through known TLDs.
+//   - This allows for rapid identification of the TLD in the domain string.
+//
+// Example Usage:
+//
+//	parser := NewDomainParser()
+//	domain := "www.example.com"
+//	parsedDomain := parser.Parse(domain)
+//	fmt.Println(parsedDomain.Subdomain)  // Output: "www"
+//	fmt.Println(parsedDomain.SLD)        // Output: "example"
+//	fmt.Println(parsedDomain.TLD)        // Output: "com"
 type DomainParser struct {
-	sa *suffixarray.Index // Suffix array index for efficiently searching TLDs.
+	sa *suffixarray.Index
 }
 
 // Parse takes a full domain string (e.g., "www.example.com") and splits it into three main components:
-// subdomain, root domain, and TLD. The method leverages the suffix array to identify the TLD and then
-// extracts the other parts of the domain accordingly.
+// subdomain, root domain (SLD), and TLD. The method uses the suffix array to identify the TLD and then
+// extracts the subdomain and root domain from the rest of the domain string.
+//
+// Parameters:
+//   - domain (string): The full domain string to be parsed.
 //
 // Returns:
-//   - parsed: A pointer to a Domain struct containing the subdomain, root domain, and TLD.
+//   - parsed (*Domain): A pointer to a Domain struct containing the subdomain, root domain (SLD), and TLD.
 func (p *DomainParser) Parse(domain string) (parsed *Domain) {
 	parsed = &Domain{}
 
-	// Split the domain into parts based on the '.' character.
 	parts := strings.Split(domain, ".")
 
-	// If the domain has no dots or consists of a single part, treat the entire domain as the root.
 	if len(parts) <= 1 {
-		parsed.Root = domain
+		parsed.SLD = domain
 
 		return
 	}
 
-	// Use the findTLDOffset method to determine where the TLD begins in the domain parts.
 	TLDOffset := p.findTLDOffset(parts)
 
-	// If no valid TLD is found, treat the entire domain as the root.
 	if TLDOffset < 0 {
-		parsed.Root = domain
+		parsed.SLD = domain
 
 		return
 	}
 
-	// Separate the domain components based on the identified TLD offset.
-	parsed.Sub = strings.Join(parts[:TLDOffset], ".")
-	parsed.Root = parts[TLDOffset]
-	parsed.TopLevel = strings.Join(parts[TLDOffset+1:], ".")
+	parsed.Subdomain = strings.Join(parts[:TLDOffset], ".")
+	parsed.SLD = parts[TLDOffset]
+	parsed.TLD = strings.Join(parts[TLDOffset+1:], ".")
 
 	return
 }
 
 // findTLDOffset searches the domain parts to find the position where the TLD starts.
-// It works backwards through the domain parts to handle complex cases where subdomains may
-// appear similar to TLDs. The suffix array is used to efficiently find known TLDs.
+// It works backward through the domain parts, from right (TLD) to left (subdomain),
+// to handle complex cases where subdomains might appear similar to TLDs.
+//
+// This method uses the suffix array to efficiently identify known TLDs.
 //
 // Parameters:
-//   - parts: A slice of domain components split by '.' (e.g., ["www", "example", "com"]).
+//   - parts ([]string): A slice of domain components split by '.' (e.g., ["www", "example", "com"]).
 //
 // Returns:
-//   - offset: The index of the last part that is the root domain, or -1 if no valid TLD is found.
+//   - offset (int): The index of the root domain (SLD) or -1 if no valid TLD is found.
 func (p *DomainParser) findTLDOffset(parts []string) (offset int) {
 	offset = -1
 
 	partsLength := len(parts)
 	partsLastIndex := partsLength - 1
 
-	// Iterate through the parts starting from the right (TLD) to the left (subdomain).
 	for i := partsLastIndex; i >= 0; i-- {
-		// Reconstruct the potential TLD by joining parts from the current index to the end.
 		TLD := strings.Join(parts[i:], ".")
 
-		// Search for the TLD in the suffix array.
 		indices := p.sa.Lookup([]byte(TLD), -1)
 
-		// If a valid TLD is found, update the offset to the position before the TLD starts.
 		if len(indices) > 0 {
 			offset = i - 1
 		} else {
@@ -87,41 +100,42 @@ func (p *DomainParser) findTLDOffset(parts []string) (offset int) {
 }
 
 // DomainParserInterface defines the interface for domain parsing functionality.
-// This interface ensures that any struct implementing it can parse domain strings
-// and find the TLD offset within domain components.
 type DomainParserInterface interface {
-	Parse(domain string) (parsed *Domain) // Parse the full domain into its components.
+	Parse(domain string) (parsed *Domain)
 
-	findTLDOffset(parts []string) (offset int) // Find the TLD offset in the domain parts.
+	findTLDOffset(parts []string) (offset int)
 }
 
 // DomainParserOptionFunc defines a function type for configuring a DomainParser instance.
-// It is used to apply customization options, such as specifying custom TLDs.
+// This allows customization options like specifying custom TLDs.
+//
+// Example:
+//
+//	parser := NewDomainParser(DomainParserWithTLDs("custom", "tld"))
 type DomainParserOptionFunc func(*DomainParser)
 
-// Ensure type compatibility with the interface.
-// This ensures that DomainParser structs correctly implement the required interface.
+// Ensure type compatibility with the DomainParserInterface.
 var _ DomainParserInterface = &DomainParser{}
 
-// NewDomainParser creates a new DomainParser instance, initializing it with a comprehensive list
-// of top-level domains (TLDs), including both standard and pseudo-TLDs. Additional options can be
-// passed to customize the parser, such as using a custom set of TLDs.
+// NewDomainParser creates a new DomainParser instance and initializes it with a comprehensive list
+// of TLDs, including both standard TLDs and pseudo-TLDs. Additional options can be passed to customize
+// the parser, such as using a custom set of TLDs.
+//
+// Parameters:
+//   - opts (variadic DomainParserOptionFunc): Optional configuration options.
 //
 // Returns:
-//   - parser: A pointer to the initialized DomainParser.
+//   - parser (*DomainParser): A pointer to the initialized DomainParser.
 func NewDomainParser(opts ...DomainParserOptionFunc) (parser *DomainParser) {
 	parser = &DomainParser{}
 
-	// Combine standard and pseudo-TLDs for comprehensive coverage.
 	TLDs := []string{}
 
 	TLDs = append(TLDs, tlds.Official...)
 	TLDs = append(TLDs, tlds.Pseudo...)
 
-	// Initialize the suffix array with TLD data.
 	parser.sa = suffixarray.New([]byte("\x00" + strings.Join(TLDs, "\x00") + "\x00"))
 
-	// Apply any additional options
 	for _, opt := range opts {
 		opt(parser)
 	}
@@ -134,7 +148,7 @@ func NewDomainParser(opts ...DomainParserOptionFunc) (parser *DomainParser) {
 // in the default set.
 //
 // Parameters:
-//   - TLDs: A slice of custom TLDs to be used by the DomainParser.
+//   - TLDs ([]string): A slice of custom TLDs to be used by the DomainParser.
 //
 // Returns:
 //   - A DomainParserOptionFunc that applies the custom TLDs to the parser.

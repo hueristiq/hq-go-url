@@ -26,8 +26,8 @@
 
 * **Flexible Domain Extraction:** Extract domains from text using regular expressions.
 * **Flexible URL Extraction:** Extract URLs from text using regular expressions.
-* **Domain Parsing:** Parse domains into subdomains, root domains, and top-level domains (TLDs).
-* **Extended URL Parsing:** Extend the standard `net/url` package in Go with additional fields and capabilities.
+* **Domain Parsing:** Parse domains into subdomains, second-level domains (SLD), and top-level domains (TLDs).
+* **Extended URL Parsing:** Extend the standard [`net/url`](https://pkg.go.dev/net/url) package in Go with additional fields and capabilities.
 
 ## Installation
 
@@ -149,59 +149,60 @@ You can customize how URLs are extracted by specifying URL schemes, hosts, or pr
 
 #### Domains
 
-The `DomainParser` can parse domains into their components, such as subdomains, root domains, and TLDs:
-
 ```go
 package main
 
 import (
 	"fmt"
+
 	hqgourl "github.com/hueristiq/hq-go-url"
 )
 
 func main() {
-	dp := hqgourl.NewDomainParser()
+	parser := hqgourl.NewDomainParser()
 
-	parsedDomain := dp.Parse("subdomain.example.com")
+	parsed := parser.Parse("subdomain.example.com")
 
-	fmt.Printf("Subdomain: %s, Root Domain: %s, TLD: %s\n", parsedDomain.Sub, parsedDomain.Root, parsedDomain.TopLevel)
+	fmt.Printf("Subdomain: %s, SLD: %s, TLD: %s\n", parsed.Subdomain, parsed.SLD, parsed.TLD)
 }
 ```
 
 #### URLs
 
-The `Parser` provides an extended way to parse URLs, including additional fields like port and file extension:
-
 ```go
 package main
 
 import (
 	"fmt"
+
 	hqgourl "github.com/hueristiq/hq-go-url"
 )
 
 func main() {
-	up := hqgourl.NewParser()
+	parser := hqgourl.NewParser()
 
-	parsedURL, err := up.Parse("https://subdomain.example.com:8080/path/file.txt")
+	parsed, err := parser.Parse("https://subdomain.example.com:8080/path/file.txt")
 	if err != nil {
 		fmt.Println("Error parsing URL:", err)
 
 		return
 	}
 
-	fmt.Printf("Subdomain: %s\n", parsedURL.Domain.Sub)
-	fmt.Printf("Root Domain: %s\n", parsedURL.Domain.Root)
-	fmt.Printf("TLD: %s\n", parsedURL.Domain.TopLevel)
-	fmt.Printf("Port: %d\n", parsedURL.Port)
-	fmt.Printf("File Extension: %s\n", parsedURL.Extension)
+	fmt.Printf("Scheme: %s\n", parsed.Scheme)
+	fmt.Printf("Host: %s\n", parsed.Host)
+	fmt.Printf("Hostname: %s\n", parsed.Hostname())
+	fmt.Printf("Subdomain: %s\n", parsed.Domain.Subdomain)
+	fmt.Printf("SLD: %s\n", parsed.Domain.SLD)
+	fmt.Printf("TLD: %s\n", parsed.Domain.TLD)
+	fmt.Printf("Port: %s\n", parsed.Port())
+	fmt.Printf("Path: %s\n", parsed.Path)
 }
 ```
 
 Set a default scheme:
 
 ```go
-up := hqgourl.NewParser(hqgourl.ParserWithDefaultScheme("https"))
+parser := hqgourl.NewParser(hqgourl.ParserWithDefaultScheme("https"))
 ```
 
 ## Contributing

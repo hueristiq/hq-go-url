@@ -2,39 +2,70 @@ package url
 
 import "net/url"
 
-//go:generate go run gen/schemes/main.go -output ./schemes/schemes_official.go
-//go:generate go run gen/TLDs/main.go -output ./tlds/tlds_official.go
-//go:generate go run gen/unicodes/main.go -output ./unicodes/unicodes.go
-
-// URL extends the standard net/url URL struct by embedding it and adding additional domain-related fields.
-// The extended struct includes subdomain, root domain, and top-level domain (TLD) information,
-// along with standard URL components (such as scheme, host, and path) provided by the embedded URL struct.
+// URL extends the standard net/url URL struct by embedding it and adding additional fields
+// for handling domain-related information. This extension provides a more detailed representation
+// of the URL by including a separate `Domain` struct that breaks down the domain into Subdomain,
+// second-level domain (SLD), and top-level domain (TLD).
 //
-// Additional Fields:
-//   - Domain: A pointer to a Domain struct that contains parsed subdomain, root domain, and TLD details.
-//   - Port: The port number used in the URL, if specified.
-//   - Extension: The file extension derived from the URL's path, useful for identifying file types in URLs.
+// Fields:
 //
-// This extended struct provides a more comprehensive representation of a URL, especially in scenarios
-// where parsing and understanding domain parts (subdomains, root domains, and TLDs) is important.
+//   - URL (*url.URL):
+//
+//   - Embeds the standard `net/url.URL` struct, which provides all the base URL parsing and
+//     functionalities, such as handling the scheme, host, path, query parameters, and fragment.
+//
+//   - Methods and functions from the embedded `net/url.URL` can be used transparently.
+//
+//   - Domain (*Domain):
+//
+//   - A pointer to the `Domain` struct that contains parsed domain information, including:
+//
+//   - Subdomain (string): The subdomain of the URL (e.g., "www" in "www.example.com").
+//
+//   - Second-level domain (SLD) (string): The main domain (e.g., "example").
+//
+//   - Top-level domain (TLD) (string): The domain suffix (e.g., "com" in "www.example.com").
+//
+//   - This allows for better handling of domain components, which is useful in cases like:
+//
+//   - URL classification and domain analysis.
+//
+//   - Security or SEO applications where separating domain components is important.
 //
 // Example Usage:
 //
-//	parsedURL, _ := url.Parse("https://www.example.com:8080/index.html")
+//	// Parse a URL using the standard url.Parse method.
+//	parsedURL, _ := url.Parse("https://www.example.com")
+//
+//	// Create an extended URL object and manually add domain information.
 //	extendedURL := &URL{
-//	    URL: parsedURL,
-//	    Port: 8080,
-//	    Extension: "html",
+//	    URL: parsedURL, // Embeds the parsed URL from the standard library.
+//
+//	    // Domain can be parsed separately or manually assigned.
 //	    Domain: &Domain{
-//	        Sub: "www",
-//	        Root: "example",
-//	        TopLevel: "com",
+//	        Subdomain:      "www",     // Subdomain part (e.g., "www").
+//	        SLD:     "example", // Root domain part (e.g., "example").
+//	        TLD: "com",     // Top-level domain part (e.g., "com").
 //	    },
 //	}
+//
+//	// Access standard URL components.
+//	fmt.Println(extendedURL.Scheme)   // Output: https
+//	fmt.Println(extendedURL.Host)     // Output: www.example.com
+//	fmt.Println(extendedURL.Path)     // Output: /
+//
+//	// Access domain-specific information.
+//	fmt.Println(extendedURL.Domain.Subdomain)      // Output: www
+//	fmt.Println(extendedURL.Domain.SLD)     // Output: example
+//	fmt.Println(extendedURL.Domain.TLD) // Output: com
+//
+// Purpose:
+//
+//	This `URL` struct provides a more detailed breakdown of a URL's domain components,
+//	making it particularly useful for tasks involving domain analysis, URL classification,
+//	or scenarios where understanding subdomains, root domains, and TLDs is important.
 type URL struct {
-	*url.URL // Embedding the standard net/url URL struct for base functionalities.
+	*url.URL
 
-	Domain    *Domain // Contains parsed domain parts: subdomain, root domain, and TLD.
-	Port      int     // Port number used in the URL.
-	Extension string  // File extension derived from the URL path.
+	Domain *Domain
 }
