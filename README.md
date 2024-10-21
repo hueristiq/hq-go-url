@@ -45,12 +45,7 @@ Below are examples demonstrating how to use the different features of the `hq-go
 
 ### Extraction
 
-> [!NOTE]
-> Since Extraction API is centered around [regexp.Regexp](https://golang.org/pkg/regexp/#Regexp), many other methods are available
-
 #### Domains
-
-You can extract domains from a given text string using the Extractor. Here's a simple example:
 
 ```go
 package main
@@ -97,8 +92,6 @@ You can customize how domains are extracted by specifying URL schemes, hosts, or
 	This configuration will extract domains that have `example` or `rootdomain` root domain.
 
 #### URLs
-
-You can extract URLs from a given text string using the Extractor. Here's a simple example:
 
 ```go
 package main
@@ -226,4 +219,4 @@ A huge thanks to all the contributors who have helped make `hq-go-url` what it i
 
 If you're interested in more packages like this, check out:
 
-[DomainParser](https://github.com/Cgboal/DomainParser) ◇ [urlx](https://github.com/goware/urlx) ◇ [xurls](https://github.com/mvdan/xurls) ◇ [goware's tldomains](https://github.com/goware/tldomains) ◇ [jakewarren's tldomains](https://github.com/jakewarren/tldomains)
+[urlx](https://github.com/goware/urlx) ◇ [xurls](https://github.com/mvdan/xurls)

@@ -37,6 +37,8 @@ func TestDomainExtractor_CompileRegex_Default(t *testing.T) {
 		{"example.co.uk", true},
 		{"invalid_domain", false},
 		{"just_text", false},
+		{"http://192.168.0.1/path", false},
+		{"https://[2001:0db8:85a3:0000:0000:8a2e:0370:7334]:17000", false},
 		{"ftp://example.com", true},
 	}
 

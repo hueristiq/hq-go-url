@@ -3,7 +3,6 @@ package url
 import (
 	"fmt"
 	"net/url"
-	"regexp"
 	"strings"
 )
 
@@ -74,9 +73,7 @@ func (p *Parser) Parse(unparsed string) (parsed *URL, err error) {
 		return
 	}
 
-	domainRegex := regexp.MustCompile(`(?i)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}`)
-
-	if domainRegex.MatchString(parsed.Hostname()) {
+	if NewDomainExtractor().CompileRegex().MatchString(parsed.Hostname()) {
 		parsed.Domain = p.dp.Parse(parsed.Hostname())
 	}
 
