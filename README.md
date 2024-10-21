@@ -26,7 +26,7 @@
 
 * **Flexible Domain Extraction:** Extract domains from text using regular expressions.
 * **Flexible URL Extraction:** Extract URLs from text using regular expressions.
-* **Domain Parsing:** Parse domains into subdomains, second-level domains (SLD), and top-level domains (TLDs).
+* **Domain Parsing:** Parse domains into subdomains, second-level domains, and top-level domains.
 * **Extended URL Parsing:** Extend the standard [`net/url`](https://pkg.go.dev/net/url) package in Go with additional fields and capabilities.
 
 ## Installation
