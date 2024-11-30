@@ -2,7 +2,7 @@
 
 ![made with go](https://img.shields.io/badge/made%20with-Go-1E90FF.svg) [![go report card](https://goreportcard.com/badge/github.com/hueristiq/hq-go-url)](https://goreportcard.com/report/github.com/hueristiq/hq-go-url) [![open issues](https://img.shields.io/github/issues-raw/hueristiq/hq-go-url.svg?style=flat&color=1E90FF)](https://github.com/hueristiq/hq-go-url/issues?q=is:issue+is:open) [![closed issues](https://img.shields.io/github/issues-closed-raw/hueristiq/hq-go-url.svg?style=flat&color=1E90FF)](https://github.com/hueristiq/hq-go-url/issues?q=is:issue+is:closed) [![license](https://img.shields.io/badge/license-MIT-gray.svg?color=1E90FF)](https://github.com/hueristiq/hq-go-url/blob/master/LICENSE) ![maintenance](https://img.shields.io/badge/maintained%3F-yes-1E90FF.svg) [![contribution](https://img.shields.io/badge/contributions-welcome-1E90FF.svg)](https://github.com/hueristiq/hq-go-url/blob/master/CONTRIBUTING.md)
 
-`hq-go-url` is a [Go (Golang)](http://golang.org/) package designed for extracting, parsing, and manipulating URLs with ease. This library is useful for developers who need to work with URLs in a structured way.
+`hq-go-url` is a [Go (Golang)](http://golang.org/) package for extracting, parsing, and manipulating URLs with ease. This library is useful for developers who need to work with URLs in a structured way.
 
 ## Resources
 
@@ -20,7 +20,7 @@
 * [Licensing](#licensing)
 * [Credits](#credits)
 	* [Contributors](#contributors)
-	* [Similar Projects](#similar-projects)
+	* [Alternatives](#alternatives)
 
 ## Features
 
@@ -215,7 +215,7 @@ A huge thanks to all the contributors who have helped make `hq-go-url` what it i
 
 [![contributors](https://contrib.rocks/image?repo=hueristiq/hq-go-url&max=500)](https://github.com/hueristiq/hq-go-url/graphs/contributors)
 
-### Similar Projects
+### Alternatives
 
 If you're interested in more packages like this, check out:
 

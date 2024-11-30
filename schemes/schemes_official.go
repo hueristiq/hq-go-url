@@ -310,6 +310,7 @@ var Official = []string{
 	"sftp",
 	"sgn",
 	"shc",
+	"shelter",
 	"sieve",
 	"simpleledger",
 	"simplex",
