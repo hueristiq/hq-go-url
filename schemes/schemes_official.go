@@ -342,6 +342,8 @@ var Official = []string{
 	"tag",
 	"taler",
 	"teamspeak",
+	"teapot",
+	"teapots",
 	"tel",
 	"teliaeid",
 	"telnet",
