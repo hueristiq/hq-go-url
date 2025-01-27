@@ -5,9 +5,9 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/hueristiq/hq-go-url/schemes"
-	"github.com/hueristiq/hq-go-url/tlds"
-	"github.com/hueristiq/hq-go-url/unicodes"
+	"go.source.hueristiq.com/url/schemes"
+	"go.source.hueristiq.com/url/tlds"
+	"go.source.hueristiq.com/url/unicodes"
 )
 
 // Extractor is a struct that configures the URL extraction process.

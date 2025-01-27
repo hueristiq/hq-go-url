@@ -3,9 +3,9 @@ package url_test
 import (
 	"testing"
 
-	hqgourl "github.com/hueristiq/hq-go-url"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	hqgourl "go.source.hueristiq.com/url"
 )
 
 // Test parsing a valid URL with a scheme and domain.

@@ -3,8 +3,8 @@ package url_test
 import (
 	"testing"
 
-	hqgourl "github.com/hueristiq/hq-go-url"
 	"github.com/stretchr/testify/assert"
+	hqgourl "go.source.hueristiq.com/url"
 )
 
 // Test parsing of a valid domain with subdomain, SLD, and TLD.

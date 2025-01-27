@@ -34,7 +34,7 @@
 To install the package, run the following command in your terminal:
 
 ```bash
-go get -v -u github.com/hueristiq/hq-go-url
+go get -v -u go.source.hueristiq.com/url
 ```
 
 This command will download and install the `hq-go-url` package into your Go workspace, making it available for use in your projects.
@@ -52,7 +52,7 @@ package main
 
 import (
 	"fmt"
-	hqgourl "github.com/hueristiq/hq-go-url"
+	hqgourl "go.source.hueristiq.com/url"
 	"regexp"
 )
 
@@ -98,7 +98,7 @@ package main
 
 import (
 	"fmt"
-	hqgourl "github.com/hueristiq/hq-go-url"
+	hqgourl "go.source.hueristiq.com/url"
 	"regexp"
 )
 
@@ -148,7 +148,7 @@ package main
 import (
 	"fmt"
 
-	hqgourl "github.com/hueristiq/hq-go-url"
+	hqgourl "go.source.hueristiq.com/url"
 )
 
 func main() {
@@ -168,7 +168,7 @@ package main
 import (
 	"fmt"
 
-	hqgourl "github.com/hueristiq/hq-go-url"
+	hqgourl "go.source.hueristiq.com/url"
 )
 
 func main() {

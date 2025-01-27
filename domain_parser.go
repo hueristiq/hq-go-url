@@ -4,7 +4,7 @@ import (
 	"index/suffixarray"
 	"strings"
 
-	"github.com/hueristiq/hq-go-url/tlds"
+	"go.source.hueristiq.com/url/tlds"
 )
 
 // DomainParser is responsible for parsing domain names into their constituent parts: subdomain,

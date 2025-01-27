@@ -3,10 +3,10 @@ package url_test
 import (
 	"testing"
 
-	hqgourl "github.com/hueristiq/hq-go-url"
-	"github.com/hueristiq/hq-go-url/tlds"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	hqgourl "go.source.hueristiq.com/url"
+	"go.source.hueristiq.com/url/tlds"
 )
 
 func TestDomainExtractor_CompileRegex_Default(t *testing.T) {

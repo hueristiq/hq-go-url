@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"unicode/utf8"
 
-	"github.com/hueristiq/hq-go-url/tlds"
+	"go.source.hueristiq.com/url/tlds"
 )
 
 // DomainExtractor is responsible for extracting domain names, including both root domains

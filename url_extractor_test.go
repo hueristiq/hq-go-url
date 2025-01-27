@@ -3,7 +3,7 @@ package url_test
 import (
 	"testing"
 
-	hqgourl "github.com/hueristiq/hq-go-url"
+	hqgourl "go.source.hueristiq.com/url"
 )
 
 func TestNewExtractor(t *testing.T) {
