@@ -1,20 +1,20 @@
-package url_test
+package parser_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	hqgourl "go.source.hueristiq.com/url"
+	"go.source.hueristiq.com/url/parser"
 )
 
 // Test parsing a valid URL with a scheme and domain.
 func TestParser_Parse_ValidURL(t *testing.T) {
 	t.Parallel()
 
-	parser := hqgourl.NewParser()
+	p := parser.New()
 
-	parsed, err := parser.Parse("https://www.example.com/path")
+	parsed, err := p.Parse("https://www.example.com/path")
 
 	require.NoError(t, err)
 
@@ -36,9 +36,9 @@ func TestParser_Parse_ValidURL(t *testing.T) {
 func TestParser_Parse_InvalidURL(t *testing.T) {
 	t.Parallel()
 
-	parser := hqgourl.NewParser()
+	p := parser.New()
 
-	_, err := parser.Parse("://example.com")
+	_, err := p.Parse("://example.com")
 
 	require.Error(t, err)
 
@@ -49,9 +49,9 @@ func TestParser_Parse_InvalidURL(t *testing.T) {
 func TestParser_Parse_URLWithoutScheme(t *testing.T) {
 	t.Parallel()
 
-	parser := hqgourl.NewParser(hqgourl.ParserWithDefaultScheme("https"))
+	p := parser.New(parser.WithDefaultScheme("https"))
 
-	parsed, err := parser.Parse("example.com/path")
+	parsed, err := p.Parse("example.com/path")
 
 	require.NoError(t, err)
 
@@ -73,9 +73,9 @@ func TestParser_Parse_URLWithoutScheme(t *testing.T) {
 func TestParser_Parse_URLWithSubdomain(t *testing.T) {
 	t.Parallel()
 
-	parser := hqgourl.NewParser()
+	p := parser.New()
 
-	parsed, err := parser.Parse("https://sub.example.com/path")
+	parsed, err := p.Parse("https://sub.example.com/path")
 
 	require.NoError(t, err)
 
@@ -92,9 +92,9 @@ func TestParser_Parse_URLWithSubdomain(t *testing.T) {
 func TestParser_Parse_URLWithPort(t *testing.T) {
 	t.Parallel()
 
-	parser := hqgourl.NewParser()
+	p := parser.New()
 
-	parsed, err := parser.Parse("https://example.com:8080/path")
+	parsed, err := p.Parse("https://example.com:8080/path")
 
 	require.NoError(t, err)
 
@@ -117,9 +117,9 @@ func TestParser_Parse_URLWithPort(t *testing.T) {
 func TestParser_Parse_CustomScheme(t *testing.T) {
 	t.Parallel()
 
-	parser := hqgourl.NewParser(hqgourl.ParserWithDefaultScheme("ftp"))
+	p := parser.New(parser.WithDefaultScheme("ftp"))
 
-	parsed, err := parser.Parse("example.com/file.txt")
+	parsed, err := p.Parse("example.com/file.txt")
 
 	require.NoError(t, err)
 
@@ -141,9 +141,9 @@ func TestParser_Parse_CustomScheme(t *testing.T) {
 func TestParser_Parse_AlreadyHasScheme(t *testing.T) {
 	t.Parallel()
 
-	parser := hqgourl.NewParser(hqgourl.ParserWithDefaultScheme("https"))
+	p := parser.New(parser.WithDefaultScheme("https"))
 
-	parsed, err := parser.Parse("http://example.com/file.txt")
+	parsed, err := p.Parse("http://example.com/file.txt")
 
 	require.NoError(t, err)
 
@@ -165,9 +165,9 @@ func TestParser_Parse_AlreadyHasScheme(t *testing.T) {
 func TestParser_Parse_URLWithIPv4Address(t *testing.T) {
 	t.Parallel()
 
-	parser := hqgourl.NewParser()
+	p := parser.New()
 
-	parsed, err := parser.Parse("http://192.168.0.1/path")
+	parsed, err := p.Parse("http://192.168.0.1/path")
 
 	require.NoError(t, err)
 
@@ -186,9 +186,9 @@ func TestParser_Parse_URLWithIPv4Address(t *testing.T) {
 func TestParser_Parse_URLWithIPv6Address(t *testing.T) {
 	t.Parallel()
 
-	parser := hqgourl.NewParser()
+	p := parser.New()
 
-	parsed, err := parser.Parse("https://[2001:0db8:85a3:0000:0000:8a2e:0370:7334]:17000")
+	parsed, err := p.Parse("https://[2001:0db8:85a3:0000:0000:8a2e:0370:7334]:17000")
 
 	require.NoError(t, err)
 

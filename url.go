@@ -1,6 +1,10 @@
 package url
 
-import "net/url"
+import (
+	"net/url"
+
+	"go.source.hueristiq.com/url/domain"
+)
 
 // URL extends the standard net/url URL struct by embedding it and adding additional fields
 // for handling domain-related information. This extension provides a more detailed representation
@@ -67,5 +71,5 @@ import "net/url"
 type URL struct {
 	*url.URL
 
-	Domain *Domain
+	Domain *domain.Domain
 }

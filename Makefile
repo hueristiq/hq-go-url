@@ -28,6 +28,10 @@ go-mod-update:
 	@# Update all other dependencies.
 	go get -f -u ./...
 
+.PHONY: go-generate
+go-generate:
+	go generate ./...
+
 .PHONY: go-fmt
 go-fmt:
 	go fmt ./...
@@ -38,7 +42,7 @@ go-lint: go-fmt
 
 .PHONY: go-test
 go-test:
-	go test ./...
+	go test -v ./...
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # --- Help -----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -56,6 +60,7 @@ help:
 	@echo "  go-mod-clean ............. Clean Go module cache."
 	@echo "  go-mod-tidy .............. Tidy Go modules."
 	@echo "  go-mod-update ............ Update Go modules."
+	@echo "  go-generate .............. Run Go generate."
 	@echo "  go-fmt ................... Format Go code."
 	@echo "  go-lint .................. Lint Go code."
 	@echo "  go-test .................. Run Go tests."

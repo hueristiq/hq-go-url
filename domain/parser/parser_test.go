@@ -1,10 +1,10 @@
-package url_test
+package parser_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	hqgourl "go.source.hueristiq.com/url"
+	"go.source.hueristiq.com/url/domain/parser"
 )
 
 // Test parsing of a valid domain with subdomain, SLD, and TLD.
@@ -13,9 +13,9 @@ func TestDomainParser_Parse_ValidDomain(t *testing.T) {
 
 	domain := "www.example.com"
 
-	parser := hqgourl.NewDomainParser()
+	p := parser.New()
 
-	parsed := parser.Parse(domain)
+	parsed := p.Parse(domain)
 
 	assert.NotNil(t, parsed)
 	assert.Equal(t, "www", parsed.Subdomain)
@@ -29,9 +29,9 @@ func TestDomainParser_Parse_DomainWithoutSubdomain(t *testing.T) {
 
 	domain := "example.com"
 
-	parser := hqgourl.NewDomainParser()
+	p := parser.New()
 
-	parsed := parser.Parse(domain)
+	parsed := p.Parse(domain)
 
 	assert.NotNil(t, parsed)
 	assert.Equal(t, "", parsed.Subdomain) // No subdomain.
@@ -45,9 +45,9 @@ func TestDomainParser_Parse_InvalidTLD(t *testing.T) {
 
 	domain := "example.invalidtld"
 
-	parser := hqgourl.NewDomainParser()
+	p := parser.New()
 
-	parsed := parser.Parse(domain)
+	parsed := p.Parse(domain)
 
 	assert.NotNil(t, parsed)
 	assert.Equal(t, "", parsed.Subdomain)             // No subdomain.
@@ -61,9 +61,9 @@ func TestDomainParser_Parse_PseudoTLD(t *testing.T) {
 
 	domain := "example.local"
 
-	parser := hqgourl.NewDomainParser()
+	p := parser.New()
 
-	parsed := parser.Parse(domain)
+	parsed := p.Parse(domain)
 
 	assert.NotNil(t, parsed)
 	assert.Equal(t, "", parsed.Subdomain)
@@ -77,9 +77,9 @@ func TestDomainParser_Parse_SingleWordDomain(t *testing.T) {
 
 	domain := "localhost"
 
-	parser := hqgourl.NewDomainParser()
+	p := parser.New()
 
-	parsed := parser.Parse(domain)
+	parsed := p.Parse(domain)
 
 	assert.NotNil(t, parsed)
 	assert.Equal(t, "", parsed.Subdomain)
@@ -93,9 +93,9 @@ func TestDomainParserWithCustomTLDs(t *testing.T) {
 
 	domain := "example.custom"
 
-	parser := hqgourl.NewDomainParser(hqgourl.DomainParserWithTLDs("custom"))
+	p := parser.New(parser.WithTLDs("custom"))
 
-	parsed := parser.Parse(domain)
+	parsed := p.Parse(domain)
 
 	assert.NotNil(t, parsed)
 	assert.Equal(t, "", parsed.Subdomain)
@@ -109,9 +109,9 @@ func TestDomainParser_Parse_EmptyString(t *testing.T) {
 
 	domain := ""
 
-	parser := hqgourl.NewDomainParser()
+	p := parser.New()
 
-	parsed := parser.Parse(domain)
+	parsed := p.Parse(domain)
 
 	assert.NotNil(t, parsed)
 	assert.Equal(t, "", parsed.Subdomain)

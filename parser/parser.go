@@ -1,9 +1,13 @@
-package url
+package parser
 
 import (
 	"fmt"
+	"net"
 	"net/url"
 	"strings"
+
+	hqgourl "go.source.hueristiq.com/url"
+	dparser "go.source.hueristiq.com/url/domain/parser"
 )
 
 // Parser is responsible for parsing URLs while also handling domain-related parsing through
@@ -31,7 +35,7 @@ import (
 //
 // Example Usage:
 //
-//	parser := NewParser(ParserWithDefaultScheme("https"))
+//	parser := New(WithDefaultScheme("https"))
 //	parsedURL, err := parser.Parse("example.com/path")
 //	if err != nil {
 //	    log.Fatal(err)
@@ -40,7 +44,7 @@ import (
 //	fmt.Println(parsedURL.Hostname()) // Output: example.com
 //	fmt.Println(parsedURL.Domain.Root) // Output: example
 type Parser struct {
-	dp *DomainParser
+	dp *dparser.Parser
 
 	scheme string
 }
@@ -59,8 +63,8 @@ type Parser struct {
 //   - parsed (*URL): A pointer to the parsed URL struct containing both standard URL components
 //     and domain-specific details.
 //   - err (error): An error if the URL cannot be parsed.
-func (p *Parser) Parse(unparsed string) (parsed *URL, err error) {
-	parsed = &URL{}
+func (p *Parser) Parse(unparsed string) (parsed *hqgourl.URL, err error) {
+	parsed = &hqgourl.URL{}
 
 	if p.scheme != "" {
 		unparsed = addScheme(unparsed, p.scheme)
@@ -73,42 +77,42 @@ func (p *Parser) Parse(unparsed string) (parsed *URL, err error) {
 		return
 	}
 
-	if NewDomainExtractor().CompileRegex().MatchString(parsed.Hostname()) {
+	if net.ParseIP(parsed.Hostname()) == nil {
 		parsed.Domain = p.dp.Parse(parsed.Hostname())
 	}
 
 	return
 }
 
-// ParserOptionFunc defines a function type for configuring a Parser instance.
+// OptionFunc defines a function type for configuring a Parser instance.
 // It is used to apply various options such as setting the default scheme.
 //
 // Example:
 //
-//	parser := NewParser(ParserWithDefaultScheme("https"))
-type ParserOptionFunc func(*Parser)
+//	parser := New(WithDefaultScheme("https"))
+type OptionFunc func(*Parser)
 
-// ParserInterface defines the interface that all Parser implementations must adhere to.
-type ParserInterface interface {
-	Parse(unparsed string) (parsed *URL, err error)
+// Interface defines the interface that all Parser implementations must adhere to.
+type Interface interface {
+	Parse(unparsed string) (parsed *hqgourl.URL, err error)
 }
 
-// Ensure that Parser implements the ParserInterface.
-var _ ParserInterface = &Parser{}
+// Ensure that Parser implements the Interface.
+var _ Interface = &Parser{}
 
-// NewParser creates and initializes a new Parser with the given options. The Parser is also
+// New creates and initializes a new Parser with the given options. The Parser is also
 // initialized with a DomainParser for extracting domain-specific details such as subdomain,
 // root domain, and TLD. Additional configuration options can be applied using the variadic
 // `opts` parameter.
 //
 // Parameters:
-//   - opts: A variadic list of `ParserOptionFunc` functions that can configure the Parser.
+//   - opts: A variadic list of `OptionFunc` functions that can configure the Parser.
 //
 // Returns:
 //   - parser (*Parser): A pointer to the initialized Parser instance.
-func NewParser(opts ...ParserOptionFunc) (parser *Parser) {
+func New(opts ...OptionFunc) (parser *Parser) {
 	parser = &Parser{
-		dp: NewDomainParser(),
+		dp: dparser.New(),
 	}
 
 	for _, opt := range opts {
@@ -118,7 +122,7 @@ func NewParser(opts ...ParserOptionFunc) (parser *Parser) {
 	return
 }
 
-// ParserWithDefaultScheme returns a `ParserOptionFunc` that sets the default scheme for the Parser.
+// WithDefaultScheme returns a `OptionFunc` that sets the default scheme for the Parser.
 // This function allows you to specify a default scheme (e.g., "http" or "https") that will be added
 // to URLs that don't provide one.
 //
@@ -126,8 +130,8 @@ func NewParser(opts ...ParserOptionFunc) (parser *Parser) {
 //   - scheme (string): The default scheme to set (e.g., "http" or "https").
 //
 // Returns:
-//   - A `ParserOptionFunc` that applies the default scheme to the Parser.
-func ParserWithDefaultScheme(scheme string) ParserOptionFunc {
+//   - A `OptionFunc` that applies the default scheme to the Parser.
+func WithDefaultScheme(scheme string) OptionFunc {
 	return func(p *Parser) {
 		p.scheme = scheme
 	}

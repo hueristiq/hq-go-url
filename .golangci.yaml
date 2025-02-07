@@ -275,7 +275,9 @@ issues:
     # "/" will be replaced by current OS file path separator to properly work on Windows.
     # Default: []
     exclude-dirs:
-        - gen
+        - schemes/gen
+        - tlds/gen
+        - unicodes/gen
     # Show issues in any part of update files (requires new-from-rev or new-from-patch).
     # Default: false
     whole-files: false

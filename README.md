@@ -18,110 +18,50 @@
 		* [URLs](#urls)
 * [Contributing](#contributing)
 * [Licensing](#licensing)
-* [Credits](#credits)
-	* [Contributors](#contributors)
-	* [Alternatives](#alternatives)
 
 ## Features
 
-* **Flexible Domain Extraction:** Extract domains from text using regular expressions.
-* **Flexible URL Extraction:** Extract URLs from text using regular expressions.
+* **Configurable URL Extraction:** Extract URLs from text using regular expressions.
 * **Domain Parsing:** Parse domains into subdomains, second-level domains, and top-level domains.
 * **Extended URL Parsing:** Extend the standard [`net/url`](https://pkg.go.dev/net/url) package in Go with additional fields and capabilities.
 
-## Installation
-
-To install the package, run the following command in your terminal:
+## Usage
 
 ```bash
 go get -v -u go.source.hueristiq.com/url
 ```
 
-This command will download and install the `hq-go-url` package into your Go workspace, making it available for use in your projects.
-
-## Usage
-
 Below are examples demonstrating how to use the different features of the `hq-go-url` package.
 
 ### Extraction
 
-#### Domains
-
 ```go
 package main
 
 import (
 	"fmt"
-	hqgourl "go.source.hueristiq.com/url"
+	"go.source.hueristiq.com/url/extractor"
 	"regexp"
 )
 
 func main() {
-	extractor := hqgourl.NewDomainExtractor()
+	e := extractor.New()
 	text := "Check out this website: https://example.com and send an email to info@example.com."
 
-	regex := extractor.CompileRegex()
-	matches := regex.FindAllString(text, -1)
-
-	fmt.Println("Found Domain:", matches)
-}
-```
-
-##### Customizing Domain Extractor
-
-You can customize how domains are extracted by specifying URL schemes, hosts, or providing custom regular expression patterns.
-
-* Extract domains with TLD Pattern:
-
-	```go
-	extractor := hqgourl.NewDomainExtractor(
-		hqgourl.DomainExtractorWithTLDPattern(`(?:com|net|org)`),
-	)
-	```
-
-	This configuration will extract only domains with `com`, `net`, or `org` TLDs.
-
-* Extract domains with Root Domain Pattern:
-
-	```go
-	extractor := hqgourl.NewDomainExtractor(
-		hqgourl.DomainExtractorWithRootDomainPattern(`(?:example|rootdomain)`), // Custom root domain pattern
-	)
-	```
-
-	This configuration will extract domains that have `example` or `rootdomain` root domain.
-
-#### URLs
-
-```go
-package main
-
-import (
-	"fmt"
-	hqgourl "go.source.hueristiq.com/url"
-	"regexp"
-)
-
-func main() {
-	extractor := hqgourl.NewExtractor()
-	text := "Check out this website: https://example.com and send an email to info@example.com."
-
-	regex := extractor.CompileRegex()
+	regex := e.CompileRegex()
 	matches := regex.FindAllString(text, -1)
 
 	fmt.Println("Found URLs:", matches)
 }
 ```
 
-##### Customizing URL Extractor
-
 You can customize how URLs are extracted by specifying URL schemes, hosts, or providing custom regular expression patterns.
 
 * Extract URLs with Schemes Pattern:
 
 	```go
-	extractor := hqgourl.NewExtractor(
-		hqgourl.ExtractorWithSchemePattern(`(?:https?|ftp)://`),
+	e := extractor.New(
+		extractor.WithSchemePattern(`(?:https?|ftp)://`),
 	)
 	```
 
@@ -130,8 +70,8 @@ You can customize how URLs are extracted by specifying URL schemes, hosts, or pr
 * Extract URLs with Host Pattern:
 
 	```go
-	extractor := hqgourl.NewExtractor(
-		hqgourl.ExtractorWithHostPattern(`(?:www\.)?example\.com`),
+	e := extractor.New(
+		extractor.WithHostPattern(`(?:www\.)?example\.com`),
 	)
 
 	```
@@ -148,13 +88,13 @@ package main
 import (
 	"fmt"
 
-	hqgourl "go.source.hueristiq.com/url"
+	"go.source.hueristiq.com/url/domain/parser"
 )
 
 func main() {
-	parser := hqgourl.NewDomainParser()
+	p := parser.New()
 
-	parsed := parser.Parse("subdomain.example.com")
+	parsed := p.Parse("subdomain.example.com")
 
 	fmt.Printf("Subdomain: %s, SLD: %s, TLD: %s\n", parsed.Subdomain, parsed.SLD, parsed.TLD)
 }
@@ -168,13 +108,13 @@ package main
 import (
 	"fmt"
 
-	hqgourl "go.source.hueristiq.com/url"
+	"go.source.hueristiq.com/url/parser"
 )
 
 func main() {
-	parser := hqgourl.NewParser()
+	p := parser.New()
 
-	parsed, err := parser.Parse("https://subdomain.example.com:8080/path/file.txt")
+	parsed, err := p.Parse("https://subdomain.example.com:8080/path/file.txt")
 	if err != nil {
 		fmt.Println("Error parsing URL:", err)
 
@@ -195,28 +135,17 @@ func main() {
 Set a default scheme:
 
 ```go
-parser := hqgourl.NewParser(hqgourl.ParserWithDefaultScheme("https"))
+p := parser.NewParser(parser.WithDefaultScheme("https"))
 ```
 
 ## Contributing
 
-We welcome contributions! Feel free to submit [Pull Requests](https://github.com/hueristiq/hq-go-url/pulls) or report [Issues](https://github.com/hueristiq/hq-go-url/issues). For more details, check out the [contribution guidelines](https://github.com/hueristiq/hq-go-url/blob/master/CONTRIBUTING.md).
+Feel free to submit [Pull Requests](https://github.com/hueristiq/hq-go-url/pulls) or report [Issues](https://github.com/hueristiq/hq-go-url/issues). For more details, check out the [contribution guidelines](https://github.com/hueristiq/hq-go-url/blob/master/CONTRIBUTING.md).
 
+Huge thanks to the [contributors](https://github.com/hueristiq/hq-go-url/graphs/contributors) thus far!
+
+![contributors](https://contrib.rocks/image?repo=hueristiq/hq-go-url&max=500)
 
 ## Licensing
 
 This package is licensed under the [MIT license](https://opensource.org/license/mit). You are free to use, modify, and distribute it, as long as you follow the terms of the license. You can find the full license text in the repository - [Full MIT license text](https://github.com/hueristiq/hq-go-url/blob/master/LICENSE).
-
-## Credits
-
-### Contributors
-
-A huge thanks to all the contributors who have helped make `hq-go-url` what it is today!
-
-[![contributors](https://contrib.rocks/image?repo=hueristiq/hq-go-url&max=500)](https://github.com/hueristiq/hq-go-url/graphs/contributors)
-
-### Alternatives
-
-If you're interested in more packages like this, check out:
-
-[urlx](https://github.com/goware/urlx) ◇ [xurls](https://github.com/mvdan/xurls)

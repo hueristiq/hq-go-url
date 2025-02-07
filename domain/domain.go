@@ -1,4 +1,4 @@
-package url
+package domain
 
 import "strings"
 
@@ -64,10 +64,8 @@ func (d *Domain) String() (domain string) {
 	return
 }
 
-// DomainInterface defines an interface for domain representations.
-type DomainInterface interface {
+type Interface interface {
 	String() (domain string)
 }
 
-// Ensure type compatibility with the DomainInterface.
-var _ DomainInterface = &Domain{}
+var _ Interface = (*Domain)(nil)
