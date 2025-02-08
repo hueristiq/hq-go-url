@@ -5,51 +5,29 @@ import (
 	"net"
 	"net/url"
 	"strings"
-
-	hqgourl "go.source.hueristiq.com/url"
-	dparser "go.source.hueristiq.com/url/domain/parser"
 )
 
-// Parser is responsible for parsing URLs while also handling domain-related parsing through
+// URL extends the standard net/url URL struct by embedding it and adding additional fields
+// for handling domain-related information. This extension provides a more detailed representation
+// of the URL by including a separate `Domain` struct that breaks down the domain into Subdomain,
+// second-level domain (SLD), and top-level domain (TLD).
+type URL struct {
+	*url.URL
+
+	Domain *Domain
+}
+
+// URLParser is responsible for parsing URLs while also handling domain-related parsing through
 // the use of a DomainParser. It extends basic URL parsing functionality by providing support
 // for handling custom schemes and extracting domain components such as subdomains, root domains,
 // and TLDs.
-//
-// Fields:
-//   - dp (*DomainParser):
-//   - A reference to a `DomainParser` used for extracting subdomain, root domain, and TLD information
-//     from the host part of the URL.
-//   - scheme (string):
-//   - The default scheme to use when parsing URLs without a specified scheme. For example,
-//     if a URL is missing a scheme (e.g., "www.example.com"), the `scheme` field will prepend a
-//     default scheme like "https", resulting in "https://www.example.com".
-//
-// Methods:
-//
-//   - Parse(unparsed string) (parsed *URL, err error):
-//   - Takes a raw URL string and parses it into a custom `URL` struct that includes both the
-//     standard URL components (via the embedded `net/url.URL`) and domain-specific details.
-//   - If the URL does not include a scheme, the default scheme is added (if specified).
-//   - Additionally, the method uses the DomainParser to break down the domain into subdomain, root domain,
-//     and TLD components.
-//
-// Example Usage:
-//
-//	parser := New(WithDefaultScheme("https"))
-//	parsedURL, err := parser.Parse("example.com/path")
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//	fmt.Println(parsedURL.Scheme)     // Output: https
-//	fmt.Println(parsedURL.Hostname()) // Output: example.com
-//	fmt.Println(parsedURL.Domain.Root) // Output: example
-type Parser struct {
-	dp *dparser.Parser
+type URLParser struct {
+	dp *DomainParser
 
 	scheme string
 }
 
-// Parse takes a raw URL string and parses it into a custom URL struct that includes:
+// URLParser takes a raw URL string and parses it into a custom URL struct that includes:
 //   - Standard URL components from `net/url` (scheme, host, path, etc.)
 //   - Domain-specific details such as subdomain, root domain, and TLD.
 //
@@ -63,8 +41,8 @@ type Parser struct {
 //   - parsed (*URL): A pointer to the parsed URL struct containing both standard URL components
 //     and domain-specific details.
 //   - err (error): An error if the URL cannot be parsed.
-func (p *Parser) Parse(unparsed string) (parsed *hqgourl.URL, err error) {
-	parsed = &hqgourl.URL{}
+func (p *URLParser) Parse(unparsed string) (parsed *URL, err error) {
+	parsed = &URL{}
 
 	if p.scheme != "" {
 		unparsed = addScheme(unparsed, p.scheme)
@@ -84,45 +62,45 @@ func (p *Parser) Parse(unparsed string) (parsed *hqgourl.URL, err error) {
 	return
 }
 
-// OptionFunc defines a function type for configuring a Parser instance.
+// URLParserOption defines a function type for configuring a Parser instance.
 // It is used to apply various options such as setting the default scheme.
 //
 // Example:
 //
-//	parser := New(WithDefaultScheme("https"))
-type OptionFunc func(*Parser)
+//	parser := NewURLParserOption(URLParserWithDefaultScheme("https"))
+type URLParserOption func(parser *URLParser)
 
-// Interface defines the interface that all Parser implementations must adhere to.
-type Interface interface {
-	Parse(unparsed string) (parsed *hqgourl.URL, err error)
+// Ensuring URLParser implements the URLParserInterface.
+type URLParserInterface interface {
+	Parse(unparsed string) (parsed *URL, err error)
 }
 
 // Ensure that Parser implements the Interface.
-var _ Interface = &Parser{}
+var _ URLParserInterface = (*URLParser)(nil)
 
 // New creates and initializes a new Parser with the given options. The Parser is also
 // initialized with a DomainParser for extracting domain-specific details such as subdomain,
 // root domain, and TLD. Additional configuration options can be applied using the variadic
-// `opts` parameter.
+// `options` parameter.
 //
 // Parameters:
-//   - opts: A variadic list of `OptionFunc` functions that can configure the Parser.
+//   - options (...URLParserOption): A variadic list of `Option` functions that can configure the Parser.
 //
 // Returns:
-//   - parser (*Parser): A pointer to the initialized Parser instance.
-func New(opts ...OptionFunc) (parser *Parser) {
-	parser = &Parser{
-		dp: dparser.New(),
+//   - parser (*URLParser): A pointer to the initialized Parser instance.
+func NewURLParser(options ...URLParserOption) (parser *URLParser) {
+	parser = &URLParser{
+		dp: NewDomainParser(),
 	}
 
-	for _, opt := range opts {
-		opt(parser)
+	for _, option := range options {
+		option(parser)
 	}
 
 	return
 }
 
-// WithDefaultScheme returns a `OptionFunc` that sets the default scheme for the Parser.
+// URLParserWithDefaultScheme returns a `Option` that sets the default scheme for the Parser.
 // This function allows you to specify a default scheme (e.g., "http" or "https") that will be added
 // to URLs that don't provide one.
 //
@@ -130,9 +108,9 @@ func New(opts ...OptionFunc) (parser *Parser) {
 //   - scheme (string): The default scheme to set (e.g., "http" or "https").
 //
 // Returns:
-//   - A `OptionFunc` that applies the default scheme to the Parser.
-func WithDefaultScheme(scheme string) OptionFunc {
-	return func(p *Parser) {
+//   - option (URLParserOption): A `Option` that applies the default scheme to the Parser.
+func URLParserWithDefaultScheme(scheme string) (option URLParserOption) {
+	return func(p *URLParser) {
 		p.scheme = scheme
 	}
 }

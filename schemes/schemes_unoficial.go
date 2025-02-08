@@ -1,14 +1,20 @@
 package schemes
 
-// Unofficial is a sorted list of some well-known URL schemes that are not yet officially registered.
-// These schemes are commonly associated with specific software or services, and while they may not be
-// part of the official URI scheme registry, they are widely recognized and used.
+// Unofficial is a sorted list of well-known URL schemes that are not officially registered.
 //
-// This list primarily gathers schemes from:
-//   - https://en.wikipedia.org/wiki/List_of_URI_schemes#Unofficial_but_common_URI_schemes
+// These schemes are widely recognized and associated with specific software or services.
+// While they may not be part of the official URI scheme registry, they are commonly used
+// for application-specific or service-specific functionalities.
 //
-// The schemes in this list are useful in specific contexts, such as handling custom protocols for
-// software applications or services.
+// Example Use Cases:
+// - Handling custom application protocols in browsers.
+// - Recognizing unofficial URL schemes in network security and filtering.
+// - Processing and parsing custom URIs in software applications.
+//
+// Reference:
+// - https://en.wikipedia.org/wiki/List_of_URI_schemes#Unofficial_but_common_URI_schemes
+//
+// The following are some of the notable unofficial schemes:.
 var Unofficial = []string{
 	`gemini`,        // Gemini - a lightweight internet protocol for navigating and publishing on the web.
 	`jdbc`,          // Java Database Connectivity (JDBC) - for connecting to databases from Java applications.

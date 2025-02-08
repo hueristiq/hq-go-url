@@ -18,15 +18,17 @@ var (
 package schemes
 
 // Official is a sorted list of all IANA-assigned URL schemes.
-// This list is periodically fetched from the IANA registry to ensure it is up-to-date.
-// The data is retrieved from:
-//   - https://www.iana.org/assignments/uri-schemes/uri-schemes-1.csv
 //
-// URL schemes, also known as URI schemes, are the prefixes used to define how a resource should be accessed.
-// Common examples include "http", "https", "ftp", and many others.
+// This list is periodically updated from the IANA registry to ensure accuracy.
+// The schemes are used to verify or process URL schemes in various applications.
 //
-// This list includes the full set of schemes officially assigned by the Internet Assigned Numbers Authority (IANA).
-// It is used to verify or process URL schemes in various applications.
+// Example Use Cases:
+// - Validating URL schemes in web applications.
+// - Handling officially recognized protocols in network security.
+// - Ensuring correct scheme usage in software applications.
+//
+// Reference:
+// - https://www.iana.org/assignments/uri-schemes/uri-schemes-1.csv
 var Official = []string{
 {{- range $scheme := .Schemes}}
 	"{{$scheme}}",

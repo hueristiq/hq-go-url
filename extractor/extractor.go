@@ -32,7 +32,7 @@ type Extractor struct {
 // and default patterns based on whether the user requires a scheme or host.
 //
 // Returns:
-//   - regex: A compiled regular expression object for URL matching.
+//   - regex (*regexp.Regexp): A compiled regular expression object for URL matching.
 //
 // Example:
 //
@@ -129,10 +129,10 @@ func (e *Extractor) CompileRegex() (regex *regexp.Regexp) {
 	return
 }
 
-// OptionFunc defines a function type for configuring Extractor instances.
+// Option defines a function type for configuring Extractor instances.
 // It allows users to pass options that modify the behavior of the Extractor, such as whether
 // to include schemes or hosts in URL extraction.
-type OptionFunc func(*Extractor)
+type Option func(extractor *Extractor)
 
 // Interface defines the interface that Extractor should implement.
 // It ensures that Extractor has the ability to compile regex patterns for URL extraction.
@@ -271,11 +271,11 @@ var _ Interface = (*Extractor)(nil)
 // to include URL schemes or hosts.
 //
 // Arguments:
-// - options: A variadic list of OptionFunc to configure the Extractor.
+// - options (...Option): A variadic list of Option to configure the Extractor.
 //
 // Returns:
-// - *Extractor: A pointer to the configured Extractor instance.
-func New(options ...OptionFunc) (extractor *Extractor) {
+// - extractor (*Extractor): A pointer to the configured Extractor instance.
+func New(options ...Option) (extractor *Extractor) {
 	extractor = &Extractor{}
 
 	for _, option := range options {
@@ -287,7 +287,10 @@ func New(options ...OptionFunc) (extractor *Extractor) {
 
 // WithScheme returns an option function that configures the Extractor
 // to require URL schemes in the extraction process.
-func WithScheme() OptionFunc {
+//
+// Returns:
+//   - option (Option):
+func WithScheme() (option Option) {
 	return func(e *Extractor) {
 		e.withScheme = true
 	}
@@ -297,8 +300,11 @@ func WithScheme() OptionFunc {
 // a custom regex pattern for matching URL schemes.
 //
 // Arguments:
-// - pattern: A regex pattern to match URL schemes.
-func WithSchemePattern(pattern string) OptionFunc {
+// - pattern (string): A regex pattern to match URL schemes.
+//
+// Returns:
+//   - option (Option):
+func WithSchemePattern(pattern string) (option Option) {
 	return func(e *Extractor) {
 		e.withScheme = true
 		e.withSchemePattern = pattern
@@ -307,7 +313,10 @@ func WithSchemePattern(pattern string) OptionFunc {
 
 // WithHost returns an option function that configures the Extractor
 // to require URL hosts in the extraction process.
-func WithHost() OptionFunc {
+//
+// Returns:
+//   - option (Option):
+func WithHost() (option Option) {
 	return func(e *Extractor) {
 		e.withHost = true
 	}
@@ -317,8 +326,11 @@ func WithHost() OptionFunc {
 // a custom regex pattern for matching URL hosts.
 //
 // Arguments:
-// - pattern: A regex pattern to match URL hosts.
-func WithHostPattern(pattern string) OptionFunc {
+// - pattern (string): A regex pattern to match URL hosts.
+//
+// Returns:
+//   - option (Option):
+func WithHostPattern(pattern string) (option Option) {
 	return func(e *Extractor) {
 		e.withHost = true
 		e.withHostPattern = pattern
@@ -330,7 +342,7 @@ func WithHostPattern(pattern string) OptionFunc {
 // each string is properly escaped for use in regex matching.
 //
 // Arguments:
-// - strs: A variadic list of strings to be matched.
+// - strs (...string): A variadic list of strings to be matched.
 //
 // Returns:
 // - string: A regex pattern matching any of the given strings.

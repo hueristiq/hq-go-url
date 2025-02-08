@@ -84,11 +84,11 @@ package main
 import (
 	"fmt"
 
-	"go.source.hueristiq.com/url/domain/parser"
+	"go.source.hueristiq.com/url/parser"
 )
 
 func main() {
-	p := parser.New()
+	p := parser.NewDomainParser()
 
 	parsed := p.Parse("subdomain.example.com")
 
@@ -108,7 +108,7 @@ import (
 )
 
 func main() {
-	p := parser.New()
+	p := parser.NewURLParser()
 
 	parsed, err := p.Parse("https://subdomain.example.com:8080/path/file.txt")
 	if err != nil {
@@ -131,7 +131,7 @@ func main() {
 Set a default scheme:
 
 ```go
-p := parser.NewParser(parser.WithDefaultScheme("https"))
+p := parser.NewURLParser(parser.URLParserWithDefaultScheme("https"))
 ```
 
 ## Contributing

@@ -1,13 +1,17 @@
 package schemes
 
 // NoAuthority is a sorted list of well-known URL schemes that do not require an authority component.
-// Instead of being followed by "://", these schemes are followed directly by a colon (":").
-// This format is typically used when the scheme does not require a host or authority part in the URL.
+//
+// These schemes use a colon (":") instead of "://" and do not require a host or authority part.
+// This format is common for protocols that address specific resources or services directly.
 //
 // The list includes both officially registered schemes and commonly used unofficial schemes.
 //
-// These schemes are used in various contexts, such as addressing specific resources or services
-// (e.g., email, telephone, file access, etc.).
+// Example Use Cases:
+// - Identifying resources without a host (e.g., local files, email, phone numbers).
+// - Handling URI schemes used for messaging, file access, and digital transactions.
+//
+// The following are some of the notable schemes without an authority component:.
 var NoAuthority = []string{
 	`bitcoin`, // Bitcoin - Used to create Bitcoin payment URIs.
 	`cid`,     // Content-ID - Identifies a specific piece of content.

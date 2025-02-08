@@ -10,11 +10,21 @@
 // - Ability to handle ASCII and Unicode TLDs.
 // - Extraction of IPv4, IPv6 addresses, and ports from URLs.
 //
-// Usage Example:
+// Example Usage:
 //
-//	extractor := New(WithScheme())
-//	regex := extractor.CompileRegex()
-//	urls := regex.FindAllString(text, -1) // Extracts URLs from text
+//	package main
+//
+//	import (
+//	    "fmt"
+//	    "go.source.hueristiq.com/url/extractor"
+//	)
+//
+//	func main() {
+//	    e := extractor.New(extractor.WithScheme())
+//	    regex := e.CompileRegex()
+//	    urls := regex.FindAllString("Visit https://example.com", -1)
+//	    fmt.Println(urls) // Output: ["https://example.com"]
+//	}
 //
 // This package is designed to be highly flexible, enabling developers to extract URLs
 // from various sources while applying custom constraints as needed.

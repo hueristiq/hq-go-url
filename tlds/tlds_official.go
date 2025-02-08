@@ -2,16 +2,19 @@
 package tlds
 
 // Official is a sorted list of public top-level domains (TLDs) and effective top-level domains (eTLDs).
-// TLDs are the highest level in the hierarchical domain name system of the Internet. eTLDs include
-// top-level domains and public suffixes, such as country code second-level domains (e.g., "co.uk" or "gov.in"),
-// that are commonly used for websites.
 //
-// The list is curated from official sources:
-//   - https://data.iana.org/TLD/tlds-alpha-by-domain.txt: Contains a list of all current IANA-approved TLDs.
-//   - https://publicsuffix.org/list/public_suffix_list.dat: Contains a list of public suffixes managed by the Public Suffix List,
-//     which identifies domain suffixes under which Internet users can register names.
+// TLDs are the highest level in the domain name system, while eTLDs include public suffixes,
+// such as country code second-level domains (e.g., "co.uk" or "gov.in"), commonly used for websites.
 //
-// This list is automatically generated to ensure it stays up to date with the latest TLDs and public suffixes.
+// Example Use Cases:
+// - Validating domain names in web applications.
+// - Identifying and processing effective top-level domains.
+// - Enhancing security filters by recognizing valid TLDs.
+//
+// References:
+// - IANA TLDs: https://data.iana.org/TLD/tlds-alpha-by-domain.txt
+// - Public Suffix List: https://publicsuffix.org/list/public_suffix_list.dat
+// - Wikipedia: https://en.wikipedia.org/wiki/Top-level_domain
 var Official = []string{
 	"0.bg",
 	"1.bg",

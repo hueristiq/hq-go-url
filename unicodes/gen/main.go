@@ -16,17 +16,26 @@ var (
 package unicodes
 
 // AllowedUcsChar defines a range of allowed Unicode characters.
-// This set includes various characters spanning multiple blocks of the Unicode specification.
-// It allows for a wide range of characters, including those from languages, symbols, and certain punctuation.
+//
+// This set includes various characters spanning multiple Unicode blocks.
+// It supports a wide range of characters, including those from different languages,
+// symbols, and select punctuation marks.
+//
+// Example Use Cases:
+// - Validating user-generated text input while allowing diverse language support.
+// - Ensuring compatibility with multiple scripts and symbols in text processing.
 const AllowedUcsChar = {{.withPunc}}
 
 // AllowedUcsCharMinusPunc defines a range of allowed Unicode characters,
-// excluding certain punctuation marks. This range is used in contexts where
-// punctuation is restricted, but the same character ranges from AllowedUcsChar
-// are allowed otherwise.
+// excluding certain punctuation marks.
 //
-// This constant is useful when processing input where punctuation is undesired
-// or needs to be filtered out, such as usernames, identifiers, or file names.
+// This set is used in contexts where punctuation is restricted, but other characters
+// from AllowedUcsChar are allowed. This is useful for filtering input in usernames,
+// identifiers, or text fields that should not contain punctuation.
+//
+// Example Use Cases:
+// - Restricting punctuation in usernames while allowing multilingual characters.
+// - Preventing unwanted symbols in database identifiers.
 const AllowedUcsCharMinusPunc = {{.withoutPunc}}
 `))
 	unicodesFile string
