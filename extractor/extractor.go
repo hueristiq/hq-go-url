@@ -10,16 +10,16 @@ import (
 	"go.source.hueristiq.com/url/unicodes"
 )
 
-// Extractor is a struct that configures the URL extraction process.
-// It provides options for controlling whether URL schemes and hosts are mandatory,
-// and allows custom regular expression patterns to be specified for these components.
-// This allows fine-grained control over the types of URLs that are extracted from text.
+// Extractor configures the URL extraction process.
+// It provides options for controlling whether URL schemes and hosts are mandatory, and allows custom
+// regular expression patterns to be specified for these components. This allows fine-grained control over
+// the types of URLs that are extracted from text.
 //
 // Fields:
-//   - withScheme: Specifies if a scheme (e.g., http) is mandatory in extracted URLs.
-//   - withSchemePattern: Specifies a custom regex pattern for matching URL schemes.
-//   - withHost: Specifies if a host (e.g., domain) is mandatory in extracted URLs.
-//   - withHostPattern: Specifies a custom regex pattern for matching URL hosts.
+//   - withScheme: A boolean flag indicating if a URL scheme (e.g., "http") is required in extracted URLs.
+//   - withSchemePattern: A custom regular expression pattern to match URL schemes.
+//   - withHost: A boolean flag indicating if a URL host (e.g., domain) is required in extracted URLs.
+//   - withHostPattern: A custom regular expression pattern to match URL hosts.
 type Extractor struct {
 	withScheme        bool
 	withSchemePattern string
@@ -27,18 +27,21 @@ type Extractor struct {
 	withHostPattern   string
 }
 
-// CompileRegex constructs and compiles a regex pattern for URL extraction.
-// It builds a pattern that can capture various URL forms, supporting both custom
-// and default patterns based on whether the user requires a scheme or host.
+// CompileRegex constructs and compiles a regular expression pattern for URL extraction.
+// It builds a composite regex pattern that can capture various URL forms, taking into account user
+// configuration for required schemes or hosts, as well as any custom patterns provided.
+// The generated pattern can match fully-qualified URLs (with schemes and hosts), email addresses,
+// and relative URLs, depending on the configuration.
 //
 // Returns:
-//   - regex (*regexp.Regexp): A compiled regular expression object for URL matching.
+//   - regex (*regexp.Regexp): A compiled regular expression object that can be used to extract URLs from text.
 //
 // Example:
 //
+//	// Create an extractor that requires URL schemes.
 //	extractor := New(WithScheme())
 //	regex := extractor.CompileRegex()
-//	urls := regex.FindAllString(text, -1) // Extracts URLs from text
+//	urls := regex.FindAllString(text, -1) // Extracts URLs from the provided text.
 func (e *Extractor) CompileRegex() (regex *regexp.Regexp) {
 	schemePattern := ExtractorSchemePattern
 
@@ -129,47 +132,118 @@ func (e *Extractor) CompileRegex() (regex *regexp.Regexp) {
 	return
 }
 
-// Option defines a function type for configuring Extractor instances.
-// It allows users to pass options that modify the behavior of the Extractor, such as whether
-// to include schemes or hosts in URL extraction.
+// WithScheme sets the Extractor to require URL schemes during extraction.
+// It marks the withScheme flag as true.
+func (e *Extractor) WithScheme() {
+	e.withScheme = true
+}
+
+// WithSchemePattern sets a custom regular expression pattern for matching URL schemes.
+// It also marks the Extractor as requiring a scheme.
+//
+// Arguments:
+//   - pattern (string): A regex pattern to match URL schemes.
+func (e *Extractor) WithSchemePattern(pattern string) {
+	e.WithScheme()
+
+	e.withSchemePattern = pattern
+}
+
+// WithHost sets the Extractor to require URL hosts during extraction.
+// It marks the withHost flag as true.
+func (e *Extractor) WithHost() {
+	e.withHost = true
+}
+
+// WithHostPattern sets a custom regular expression pattern for matching URL hosts.
+// It also marks the Extractor as requiring a host.
+//
+// Arguments:
+//   - pattern (string): A regex pattern to match URL hosts.
+func (e *Extractor) WithHostPattern(pattern string) {
+	e.WithHost()
+
+	e.withHostPattern = pattern
+}
+
+// Option defines a functional option for configuring an Extractor instance.
+// It allows the caller to pass in configuration functions that modify the Extractor's
+// settings (e.g., requiring a scheme or host, or providing custom regex patterns).
 type Option func(extractor *Extractor)
 
-// Interface defines the interface that Extractor should implement.
-// It ensures that Extractor has the ability to compile regex patterns for URL extraction.
+// Interface defines the behavior that an Extractor must implement.
+// It requires the implementation of a method to compile a regular expression for URL extraction.
 type Interface interface {
 	CompileRegex() (regex *regexp.Regexp)
 }
 
 const (
-	_alphaCharacterSet          = `a-zA-Z`
-	_digitCHaracterSet          = `0-9`
-	_IUnreservedCharacterSet    = _alphaCharacterSet + _digitCHaracterSet + `\-\._~` + unicodes.AllowedUcsChar
-	_IEndUnreservedCharacterSet = _alphaCharacterSet + _digitCHaracterSet + `\-_~` + unicodes.AllowedUcsCharMinusPunc
-	_subDelimsCharacterSet      = `!\$&'\(\)\*\+,;=`
-	_endSubDelimsCharacterSet   = `\$&\+=`
-	_pctEncodingPattern         = `%[0-9a-fA-F]{2}`
+	// _alphaCharacterSet defines the set of alphabetical characters.
+	_alphaCharacterSet = `a-zA-Z`
 
-	_IUserInfoPattern         = `(?:(?:[` + _IUnreservedCharacterSet + _subDelimsCharacterSet + `:]|` + _pctEncodingPattern + `)+@)`
+	// _digitCHaracterSet defines the set of digit characters.
+	_digitCHaracterSet = `0-9`
+
+	// _IUnreservedCharacterSet is the set of unreserved characters allowed in URL components,
+	// including letters, digits, hyphens, dots, underscores, tildes, and additional allowed Unicode characters.
+	_IUnreservedCharacterSet = _alphaCharacterSet + _digitCHaracterSet + `\-\._~` + unicodes.AllowedUcsChar
+
+	// _IEndUnreservedCharacterSet is similar to _IUnreservedCharacterSet but excludes certain punctuation.
+	_IEndUnreservedCharacterSet = _alphaCharacterSet + _digitCHaracterSet + `\-_~` + unicodes.AllowedUcsCharMinusPunc
+
+	// _subDelimsCharacterSet defines the set of sub-delimiter characters allowed in URL components.
+	_subDelimsCharacterSet = `!\$&'\(\)\*\+,;=`
+
+	// _endSubDelimsCharacterSet defines a subset of sub-delimiters typically allowed at the end of URL components.
+	_endSubDelimsCharacterSet = `\$&\+=`
+
+	// _pctEncodingPattern defines the pattern for percent-encoded characters.
+	_pctEncodingPattern = `%[0-9a-fA-F]{2}`
+
+	// _IUserInfoPattern matches user information (e.g., username:password) in a URL.
+	// It allows unreserved characters, sub-delimiters, colons, or percent-encoded characters, followed by an "@".
+	_IUserInfoPattern = `(?:(?:[` + _IUnreservedCharacterSet + _subDelimsCharacterSet + `:]|` + _pctEncodingPattern + `)+@)`
+
+	// _IUserInfoOptionalPattern makes the user information optional.
 	_IUserInfoOptionalPattern = _IUserInfoPattern + `?`
 
+	// midIPathSegmentChar defines the set of characters allowed in the middle of a URL path segment.
 	midIPathSegmentChar = _IUnreservedCharacterSet + `%` + _subDelimsCharacterSet + `:@`
+
+	// endIPathSegmentChar defines the set of characters allowed at the end of a URL path segment.
 	endIPathSegmentChar = _IEndUnreservedCharacterSet + `%` + _endSubDelimsCharacterSet
 
+	// _IPrivateCharacters defines Unicode private use areas that are allowed in URLs.
 	_IPrivateCharacters = `\x{E000}-\x{F8FF}\x{F0000}-\x{FFFFD}\x{100000}-\x{10FFFD}`
 
-	midIChar  = `/?#\\` + midIPathSegmentChar + _IPrivateCharacters
-	endIChar  = `/#` + endIPathSegmentChar + _IPrivateCharacters
+	// midIChar is the set of characters allowed in the middle of a URL component.
+	midIChar = `/?#\\` + midIPathSegmentChar + _IPrivateCharacters
+
+	// endIChar is the set of characters allowed at the end of a URL component.
+	endIChar = `/#` + endIPathSegmentChar + _IPrivateCharacters
+
+	// wellParen, wellBrack, and wellBrace match well-formed nested parentheses, brackets, and braces,
+	// respectively. wellAll combines these into a single pattern.
 	wellParen = `\((?:[` + midIChar + `]|\([` + midIChar + `]*\))*\)`
 	wellBrack = `\[(?:[` + midIChar + `]|\[[` + midIChar + `]*\])*\]`
 	wellBrace = `\{(?:[` + midIChar + `]|\{[` + midIChar + `]*\})*\}`
 	wellAll   = wellParen + `|` + wellBrack + `|` + wellBrace
-	pathCont  = `(?:[` + midIChar + `]*(?:` + wellAll + `|[` + endIChar + `]))+`
 
-	_letter              = `\p{L}`
-	_mark                = `\p{M}`
-	_number              = `\p{N}`
+	// pathCont defines the pattern for a URL path continuation. It matches segments composed of
+	// allowed middle characters and ensures that the path does not abruptly end with disallowed characters.
+	pathCont = `(?:[` + midIChar + `]*(?:` + wellAll + `|[` + endIChar + `]))+`
+
+	// _letter, _mark, _number are Unicode property patterns for letters, marks, and numbers.
+	_letter = `\p{L}`
+	_mark   = `\p{M}`
+	_number = `\p{N}`
+
+	// _IRICharctersPattern defines a pattern for a valid IRI character sequence.
+	// It matches a character with Unicode letter, mark, or number properties, possibly followed
+	// by a hyphenated sequence.
 	_IRICharctersPattern = `[` + _letter + _mark + _number + `](?:[` + _letter + _mark + _number + `\-]*[` + _letter + _mark + _number + `])?`
 
+	// _subdomainPattern matches one or more IRI character sequences followed by a dot, forming a subdomain.
 	_subdomainPattern = `(?:` + _IRICharctersPattern + `\.)+`
 )
 
@@ -267,14 +341,14 @@ var (
 var _ Interface = (*Extractor)(nil)
 
 // New creates a new Extractor instance with optional configuration.
-// The options can be used to customize how URLs are extracted, such as whether
-// to include URL schemes or hosts.
+// The options can be used to customize the behavior of the Extractor, such as requiring URL schemes
+// or hosts, and specifying custom regex patterns for these components.
 //
 // Arguments:
-// - options (...Option): A variadic list of Option to configure the Extractor.
+//   - options (...Option): A variadic list of Option functions that modify the Extractor's settings.
 //
 // Returns:
-// - extractor (*Extractor): A pointer to the configured Extractor instance.
+//   - extractor (*Extractor): A pointer to the configured Extractor instance.
 func New(options ...Option) (extractor *Extractor) {
 	extractor = &Extractor{}
 
@@ -285,67 +359,61 @@ func New(options ...Option) (extractor *Extractor) {
 	return
 }
 
-// WithScheme returns an option function that configures the Extractor
-// to require URL schemes in the extraction process.
+// WithScheme returns an Option function that configures the Extractor to require URL schemes in the extraction process.
 //
 // Returns:
-//   - option (Option):
+//   - option (Option): A function that sets the withScheme flag to true.
 func WithScheme() (option Option) {
 	return func(e *Extractor) {
-		e.withScheme = true
+		e.WithScheme()
 	}
 }
 
-// WithSchemePattern returns an option function that allows specifying
-// a custom regex pattern for matching URL schemes.
+// WithSchemePattern returns an Option function that sets a custom regex pattern for matching URL schemes.
 //
 // Arguments:
-// - pattern (string): A regex pattern to match URL schemes.
+//   - pattern (string): A regex pattern to match URL schemes.
 //
 // Returns:
-//   - option (Option):
+//   - option (Option): A function that sets the custom scheme pattern and enables the withScheme flag.
 func WithSchemePattern(pattern string) (option Option) {
 	return func(e *Extractor) {
-		e.withScheme = true
-		e.withSchemePattern = pattern
+		e.WithSchemePattern(pattern)
 	}
 }
 
-// WithHost returns an option function that configures the Extractor
-// to require URL hosts in the extraction process.
+// WithHost returns an Option function that configures the Extractor to require URL hosts in the extraction process.
 //
 // Returns:
-//   - option (Option):
+//   - option (Option): A function that sets the withHost flag to true.
 func WithHost() (option Option) {
 	return func(e *Extractor) {
-		e.withHost = true
+		e.WithHost()
 	}
 }
 
-// WithHostPattern returns an option function that allows specifying
-// a custom regex pattern for matching URL hosts.
+// WithHostPattern returns an Option function that sets a custom regex pattern for matching URL hosts.
 //
 // Arguments:
-// - pattern (string): A regex pattern to match URL hosts.
+//   - pattern (string): A regex pattern to match URL hosts.
 //
 // Returns:
-//   - option (Option):
+//   - option (Option): A function that sets the custom host pattern and enables the withHost flag.
 func WithHostPattern(pattern string) (option Option) {
 	return func(e *Extractor) {
-		e.withHost = true
-		e.withHostPattern = pattern
+		e.WithHostPattern(pattern)
 	}
 }
 
-// anyOf is a helper function that constructs a regex pattern from a list of strings.
-// It joins the provided strings into a single regular expression, ensuring that
-// each string is properly escaped for use in regex matching.
+// anyOf is a helper function that constructs a non-capturing regex pattern from a list of strings.
+// It joins the provided strings with a "|" (alternation) operator and escapes each string to ensure
+// special regex characters are treated literally.
 //
 // Arguments:
-// - strs (...string): A variadic list of strings to be matched.
+//   - strs (...string): A variadic list of strings to be included in the pattern.
 //
 // Returns:
-// - string: A regex pattern matching any of the given strings.
+//   - string: A regex pattern that matches any one of the provided strings.
 func anyOf(strs ...string) string {
 	var b strings.Builder
 

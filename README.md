@@ -2,7 +2,12 @@
 
 ![made with go](https://img.shields.io/badge/made%20with-Go-1E90FF.svg) [![go report card](https://goreportcard.com/badge/github.com/hueristiq/hq-go-url)](https://goreportcard.com/report/github.com/hueristiq/hq-go-url) [![open issues](https://img.shields.io/github/issues-raw/hueristiq/hq-go-url.svg?style=flat&color=1E90FF)](https://github.com/hueristiq/hq-go-url/issues?q=is:issue+is:open) [![closed issues](https://img.shields.io/github/issues-closed-raw/hueristiq/hq-go-url.svg?style=flat&color=1E90FF)](https://github.com/hueristiq/hq-go-url/issues?q=is:issue+is:closed) [![license](https://img.shields.io/badge/license-MIT-gray.svg?color=1E90FF)](https://github.com/hueristiq/hq-go-url/blob/master/LICENSE) ![maintenance](https://img.shields.io/badge/maintained%3F-yes-1E90FF.svg) [![contribution](https://img.shields.io/badge/contributions-welcome-1E90FF.svg)](https://github.com/hueristiq/hq-go-url/blob/master/CONTRIBUTING.md)
 
-`hq-go-url` is a [Go (Golang)](http://golang.org/) package for extracting, parsing, and manipulating URLs with ease. This library is useful for developers who need to work with URLs in a structured way.
+`hq-go-url` is a [Go (Golang)](http://golang.org/) package for extracting, parsing, and manipulating URLs with ease. It provides powerful tools to:
+
+* Extract URLs from text using flexible, customizable regular expressions.
+* Parse URLs with extended functionality that includes detailed domain analysis—splitting a domain into its subdomain, second-level domain (SLD), and top-level domain (TLD).
+
+This package is especially useful for developers who need to work with URLs in a structured way.
 
 ## Resources
 
@@ -31,23 +36,36 @@ Below are examples demonstrating how to use the different features of the `hq-go
 
 ### Extraction
 
+The extractor package allows you to extract URLs from a block of text using regular expressions that can be customized to your needs.
+
 ```go
 package main
 
 import (
-	"fmt"
-	"go.source.hueristiq.com/url/extractor"
-	"regexp"
+    "fmt"
+    "log"
+
+    "go.source.hueristiq.com/url/extractor"
 )
 
 func main() {
-	e := extractor.New()
-	text := "Check out this website: https://example.com and send an email to info@example.com."
+    // Create a new extractor with the requirement that URLs include a scheme.
+    ex := extractor.New(extractor.WithScheme())
 
-	regex := e.CompileRegex()
-	matches := regex.FindAllString(text, -1)
+    // Compile the regular expression used for URL extraction.
+    regex := ex.CompileRegex()
 
-	fmt.Println("Found URLs:", matches)
+    text := "Visit our website at https://www.example.com or contact us at info@example.com."
+
+    // Extract all matching URLs from the text.
+    urls := regex.FindAllString(text, -1)
+
+    fmt.Println("Extracted URLs:")
+
+    for _, u := range urls {
+
+        fmt.Println(u)
+    }
 }
 ```
 
