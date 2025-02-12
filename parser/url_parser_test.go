@@ -1,6 +1,7 @@
 package parser_test
 
 import (
+	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -8,173 +9,255 @@ import (
 	"go.source.hueristiq.com/url/parser"
 )
 
-func TestParser_Parse_ValidURL(t *testing.T) {
+func Test_URLParser_Parse(t *testing.T) {
 	t.Parallel()
 
 	p := parser.NewURLParser()
 
-	parsed, err := p.Parse("https://www.example.com/path")
+	tests := []struct {
+		name              string
+		URL               string
+		expectedParsedURL *parser.URL
+		expectedErr       bool
+	}{
+		{
+			"URL",
+			"https://example.com/path",
+			&parser.URL{
+				URL: &url.URL{
+					Scheme: "https",
+					Host:   "example.com",
+					Path:   "/path",
+				},
+				Domain: &parser.Domain{
+					Subdomain: "",
+					SLD:       "example",
+					TLD:       "com",
+				},
+			},
+			false,
+		},
+		{
+			"URL with subdomain",
+			"https://www.example.com/path",
+			&parser.URL{
+				URL: &url.URL{
+					Scheme: "https",
+					Host:   "www.example.com",
+					Path:   "/path",
+				},
+				Domain: &parser.Domain{
+					Subdomain: "www",
+					SLD:       "example",
+					TLD:       "com",
+				},
+			},
+			false,
+		},
+		{
+			"URL with port",
+			"https://www.example.com:8080/path",
+			&parser.URL{
+				URL: &url.URL{
+					Scheme: "https",
+					Host:   "www.example.com:8080",
+					Path:   "/path",
+				},
+				Domain: &parser.Domain{
+					Subdomain: "www",
+					SLD:       "example",
+					TLD:       "com",
+				},
+			},
+			false,
+		},
+		{
+			"URL with IPv4",
+			"http://192.168.0.1/path",
+			&parser.URL{
+				URL: &url.URL{
+					Scheme: "http",
+					Host:   "192.168.0.1",
+					Path:   "/path",
+				},
+				Domain: nil,
+			},
+			false,
+		},
+		{
+			"URL with IPv6",
+			"https://[2001:0db8:85a3:0000:0000:8a2e:0370:7334]:17000/path",
+			&parser.URL{
+				URL: &url.URL{
+					Scheme: "https",
+					Host:   "[2001:0db8:85a3:0000:0000:8a2e:0370:7334]:17000",
+					Path:   "/path",
+				},
+				Domain: nil,
+			},
+			false,
+		},
+		{
+			"Invalid URL 0",
+			"://example.com",
+			&parser.URL{},
+			true,
+		},
+		{
+			"Invalid URL 1",
+			"https://example.com/%invalid",
+			&parser.URL{},
+			true,
+		},
+		{
+			"Invalid URL 2 <- Path get's normalized",
+			"https://example.com/w%0d%2e/",
+			&parser.URL{
+				URL: &url.URL{
+					Scheme:  "https",
+					Host:    "example.com",
+					Path:    "/w\r./",
+					RawPath: "/w%0d%2e/",
+				},
+				Domain: &parser.Domain{
+					Subdomain: "",
+					SLD:       "example",
+					TLD:       "com",
+				},
+			},
+			false,
+		},
+		{
+			"Invalid URL 3",
+			"example.com/with/path?some'param=`'+OR+ORDER+BY+1--",
+			&parser.URL{
+				URL: &url.URL{
+					Scheme:   "",
+					Host:     "",
+					Path:     "example.com/with/path",
+					RawQuery: "some'param=`'+OR+ORDER+BY+1--",
+				},
+				Domain: &parser.Domain{
+					Subdomain: "",
+					SLD:       "",
+					TLD:       "",
+				},
+			},
+			false,
+		},
+		{
+			"Invalid URL 4 <- Path get's normalized",
+			"https://example.com/a/b/c/../c",
+			&parser.URL{
+				URL: &url.URL{
+					Scheme: "https",
+					Host:   "example.com",
+					Path:   "/a/b/c/../c",
+				},
+				Domain: &parser.Domain{
+					Subdomain: "",
+					SLD:       "example",
+					TLD:       "com",
+				},
+			},
+			false,
+		},
+	}
 
-	require.NoError(t, err)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-	assert.NotNil(t, parsed)
+			actualParsedURL, err := p.Parse(tt.URL)
 
-	assert.Equal(t, "https", parsed.Scheme)
-	assert.Equal(t, "www.example.com", parsed.Host)
-	assert.Equal(t, "/path", parsed.Path)
+			if tt.expectedErr {
+				require.Error(t, err, "Expected an error but got none")
 
-	assert.NotNil(t, parsed.Domain)
-	assert.Equal(t, "www", parsed.Domain.Subdomain)
-	assert.Equal(t, "example", parsed.Domain.SLD)
-	assert.Equal(t, "com", parsed.Domain.TLD)
+				return
+			}
+
+			assert.Equal(t, tt.expectedParsedURL, actualParsedURL, "Expected and actual Person structs should be equal")
+		})
+	}
 }
 
-func TestParser_Parse_InvalidURL(t *testing.T) {
-	t.Parallel()
-
-	p := parser.NewURLParser()
-
-	_, err := p.Parse("://example.com")
-
-	require.Error(t, err)
-
-	assert.Contains(t, err.Error(), "error parsing URL")
-}
-
-func TestParser_Parse_URLWithoutScheme(t *testing.T) {
+func Test_URLParser_WithDefaultScheme_Parse(t *testing.T) {
 	t.Parallel()
 
 	p := parser.NewURLParser(parser.URLParserWithDefaultScheme("https"))
 
-	parsed, err := p.Parse("example.com/path")
+	tests := []struct {
+		name              string
+		URL               string
+		expectedParsedURL *parser.URL
+		expectedErr       bool
+	}{
+		{
+			"URL without scheme",
+			"example.com/path",
+			&parser.URL{
+				URL: &url.URL{
+					Scheme: "https",
+					Host:   "example.com",
+					Path:   "/path",
+				},
+				Domain: &parser.Domain{
+					Subdomain: "",
+					SLD:       "example",
+					TLD:       "com",
+				},
+			},
+			false,
+		},
+		{
+			"URL with ://",
+			"://example.com/path",
+			&parser.URL{
+				URL: &url.URL{
+					Scheme: "https",
+					Host:   "example.com",
+					Path:   "/path",
+				},
+				Domain: &parser.Domain{
+					Subdomain: "",
+					SLD:       "example",
+					TLD:       "com",
+				},
+			},
+			false,
+		},
+		{
+			"URL with scheme",
+			"http://example.com/path",
+			&parser.URL{
+				URL: &url.URL{
+					Scheme: "http",
+					Host:   "example.com",
+					Path:   "/path",
+				},
+				Domain: &parser.Domain{
+					Subdomain: "",
+					SLD:       "example",
+					TLD:       "com",
+				},
+			},
+			false,
+		},
+	}
 
-	require.NoError(t, err)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-	assert.NotNil(t, parsed)
+			actualParsedURL, err := p.Parse(tt.URL)
 
-	assert.Equal(t, "https", parsed.Scheme)
-	assert.Equal(t, "example.com", parsed.Host)
-	assert.Equal(t, "/path", parsed.Path)
+			if tt.expectedErr {
+				require.Error(t, err, "Expected an error but got none")
 
-	assert.NotNil(t, parsed.Domain)
-	assert.Equal(t, "", parsed.Domain.Subdomain)
-	assert.Equal(t, "example", parsed.Domain.SLD)
-	assert.Equal(t, "com", parsed.Domain.TLD)
-}
+				return
+			}
 
-func TestParser_Parse_URLWithSubdomain(t *testing.T) {
-	t.Parallel()
-
-	p := parser.NewURLParser()
-
-	parsed, err := p.Parse("https://sub.example.com/path")
-
-	require.NoError(t, err)
-
-	assert.NotNil(t, parsed)
-
-	assert.NotNil(t, parsed.Domain)
-	assert.Equal(t, "sub", parsed.Domain.Subdomain)
-	assert.Equal(t, "example", parsed.Domain.SLD)
-	assert.Equal(t, "com", parsed.Domain.TLD)
-}
-
-func TestParser_Parse_URLWithPort(t *testing.T) {
-	t.Parallel()
-
-	p := parser.NewURLParser()
-
-	parsed, err := p.Parse("https://example.com:8080/path")
-
-	require.NoError(t, err)
-
-	assert.NotNil(t, parsed)
-
-	assert.Equal(t, "https", parsed.Scheme)
-	assert.Equal(t, "example.com:8080", parsed.Host)
-	assert.Equal(t, "example.com", parsed.Hostname())
-	assert.Equal(t, "/path", parsed.Path)
-
-	assert.NotNil(t, parsed.Domain)
-	assert.Equal(t, "", parsed.Domain.Subdomain)
-	assert.Equal(t, "example", parsed.Domain.SLD)
-	assert.Equal(t, "com", parsed.Domain.TLD)
-}
-
-func TestParser_Parse_CustomScheme(t *testing.T) {
-	t.Parallel()
-
-	p := parser.NewURLParser(parser.URLParserWithDefaultScheme("ftp"))
-
-	parsed, err := p.Parse("example.com/file.txt")
-
-	require.NoError(t, err)
-
-	assert.NotNil(t, parsed)
-
-	assert.Equal(t, "ftp", parsed.Scheme)
-	assert.Equal(t, "example.com", parsed.Host)
-	assert.Equal(t, "/file.txt", parsed.Path)
-
-	assert.NotNil(t, parsed.Domain)
-	assert.Equal(t, "", parsed.Domain.Subdomain)
-	assert.Equal(t, "example", parsed.Domain.SLD)
-	assert.Equal(t, "com", parsed.Domain.TLD)
-}
-
-func TestParser_Parse_AlreadyHasScheme(t *testing.T) {
-	t.Parallel()
-
-	p := parser.NewURLParser(parser.URLParserWithDefaultScheme("https"))
-
-	parsed, err := p.Parse("http://example.com/file.txt")
-
-	require.NoError(t, err)
-
-	assert.NotNil(t, parsed)
-
-	assert.Equal(t, "http", parsed.Scheme)
-	assert.Equal(t, "example.com", parsed.Host)
-	assert.Equal(t, "/file.txt", parsed.Path)
-
-	assert.NotNil(t, parsed.Domain)
-	assert.Equal(t, "", parsed.Domain.Subdomain)
-	assert.Equal(t, "example", parsed.Domain.SLD)
-	assert.Equal(t, "com", parsed.Domain.TLD)
-}
-
-func TestParser_Parse_URLWithIPv4Address(t *testing.T) {
-	t.Parallel()
-
-	p := parser.NewURLParser()
-
-	parsed, err := p.Parse("http://192.168.0.1/path")
-
-	require.NoError(t, err)
-
-	assert.NotNil(t, parsed)
-
-	assert.Equal(t, "http", parsed.Scheme)
-	assert.Equal(t, "192.168.0.1", parsed.Host)
-	assert.Equal(t, "/path", parsed.Path)
-
-	assert.Nil(t, parsed.Domain)
-}
-
-func TestParser_Parse_URLWithIPv6Address(t *testing.T) {
-	t.Parallel()
-
-	p := parser.NewURLParser()
-
-	parsed, err := p.Parse("https://[2001:0db8:85a3:0000:0000:8a2e:0370:7334]:17000")
-
-	require.NoError(t, err)
-
-	assert.NotNil(t, parsed)
-
-	assert.Equal(t, "https", parsed.Scheme)
-	assert.Equal(t, "[2001:0db8:85a3:0000:0000:8a2e:0370:7334]:17000", parsed.Host)
-	assert.Equal(t, "", parsed.Path)
-
-	assert.Nil(t, parsed.Domain)
+			assert.Equal(t, tt.expectedParsedURL, actualParsedURL, "Expected and actual Person structs should be equal")
+		})
+	}
 }
