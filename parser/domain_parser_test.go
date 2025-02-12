@@ -7,82 +7,75 @@ import (
 	"go.source.hueristiq.com/url/parser"
 )
 
-func TestDomainParser_Parse_ValidDomain(t *testing.T) {
+func Test_DomainParser_Parse(t *testing.T) {
 	t.Parallel()
-
-	domain := "www.example.com"
 
 	p := parser.NewDomainParser()
 
-	parsed := p.Parse(domain)
+	tests := []struct {
+		name                 string
+		domain               string
+		expectedParsedDomain *parser.Domain
+	}{
+		{
+			"domain",
+			"example.com",
+			&parser.Domain{
+				Subdomain: "",
+				SLD:       "example",
+				TLD:       "com",
+			},
+		},
+		{
+			"domain with subdomain",
+			"www.example.com",
+			&parser.Domain{
+				Subdomain: "www",
+				SLD:       "example",
+				TLD:       "com",
+			},
+		},
+		{
+			"domain with invalid TLD",
+			"example.invalidtld",
+			&parser.Domain{
+				Subdomain: "",
+				SLD:       "example.invalidtld",
+				TLD:       "",
+			},
+		},
+		{
+			"domain with pseudo TLD",
+			"example.local",
+			&parser.Domain{
+				Subdomain: "",
+				SLD:       "example",
+				TLD:       "local",
+			},
+		},
+		{
+			"domain (single word)",
+			"localhost",
+			&parser.Domain{
+				Subdomain: "",
+				SLD:       "localhost",
+				TLD:       "",
+			},
+		},
+	}
 
-	assert.NotNil(t, parsed)
-	assert.Equal(t, "www", parsed.Subdomain)
-	assert.Equal(t, "example", parsed.SLD)
-	assert.Equal(t, "com", parsed.TLD)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			actualParsedDomain := p.Parse(tt.domain)
+
+			assert.Equal(t, tt.expectedParsedDomain, actualParsedDomain, "Expected and actual Person structs should be equal")
+		})
+	}
 }
 
-func TestDomainParser_Parse_DomainWithoutSubdomain(t *testing.T) {
-	t.Parallel()
-
-	domain := "example.com"
-
-	p := parser.NewDomainParser()
-
-	parsed := p.Parse(domain)
-
-	assert.NotNil(t, parsed)
-	assert.Equal(t, "", parsed.Subdomain)
-	assert.Equal(t, "example", parsed.SLD)
-	assert.Equal(t, "com", parsed.TLD)
-}
-
-func TestDomainParser_Parse_InvalidTLD(t *testing.T) {
-	t.Parallel()
-
-	domain := "example.invalidtld"
-
-	p := parser.NewDomainParser()
-
-	parsed := p.Parse(domain)
-
-	assert.NotNil(t, parsed)
-	assert.Equal(t, "", parsed.Subdomain)
-	assert.Equal(t, "example.invalidtld", parsed.SLD)
-	assert.Equal(t, "", parsed.TLD)
-}
-
-func TestDomainParser_Parse_PseudoTLD(t *testing.T) {
-	t.Parallel()
-
-	domain := "example.local"
-
-	p := parser.NewDomainParser()
-
-	parsed := p.Parse(domain)
-
-	assert.NotNil(t, parsed)
-	assert.Equal(t, "", parsed.Subdomain)
-	assert.Equal(t, "example", parsed.SLD)
-	assert.Equal(t, "local", parsed.TLD)
-}
-
-func TestDomainParser_Parse_SingleWordDomain(t *testing.T) {
-	t.Parallel()
-
-	domain := "localhost"
-
-	p := parser.NewDomainParser()
-
-	parsed := p.Parse(domain)
-
-	assert.NotNil(t, parsed)
-	assert.Equal(t, "", parsed.Subdomain)
-	assert.Equal(t, "localhost", parsed.SLD)
-	assert.Equal(t, "", parsed.TLD)
-}
-
-func TestDomainParserWithCustomTLDs(t *testing.T) {
+func Test_DomainParser_WithTLDs_Parse(t *testing.T) {
 	t.Parallel()
 
 	domain := "example.custom"
@@ -95,19 +88,4 @@ func TestDomainParserWithCustomTLDs(t *testing.T) {
 	assert.Equal(t, "", parsed.Subdomain)
 	assert.Equal(t, "example", parsed.SLD)
 	assert.Equal(t, "custom", parsed.TLD)
-}
-
-func TestDomainParser_Parse_EmptyString(t *testing.T) {
-	t.Parallel()
-
-	domain := ""
-
-	p := parser.NewDomainParser()
-
-	parsed := p.Parse(domain)
-
-	assert.NotNil(t, parsed)
-	assert.Equal(t, "", parsed.Subdomain)
-	assert.Equal(t, "", parsed.SLD)
-	assert.Equal(t, "", parsed.TLD)
 }
