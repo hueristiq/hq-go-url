@@ -23,7 +23,6 @@ This package is especially useful for developers who need to work with URLs in a
 ## Features
 
 * **Configurable URL Extraction:** Extract URLs from text using regular expressions.
-* **Domain Parsing:** Parse domains into subdomains, second-level domains, and top-level domains.
 * **Extended URL Parsing:** Extend the standard [`net/url`](https://pkg.go.dev/net/url) package in Go with additional fields and capabilities.
 
 ## Usage
@@ -94,8 +93,6 @@ You can customize how URLs are extracted by specifying URL schemes, hosts, or pr
 
 ### Parsing
 
-#### Domains
-
 ```go
 package main
 
@@ -106,27 +103,7 @@ import (
 )
 
 func main() {
-	p := parser.NewDomainParser()
-
-	parsed := p.Parse("subdomain.example.com")
-
-	fmt.Printf("Subdomain: %s, SLD: %s, TLD: %s\n", parsed.Subdomain, parsed.SLD, parsed.TLD)
-}
-```
-
-#### URLs
-
-```go
-package main
-
-import (
-	"fmt"
-
-	"go.source.hueristiq.com/url/parser"
-)
-
-func main() {
-	p := parser.NewURLParser()
+	p := parser.NewParser()
 
 	parsed, err := p.Parse("https://subdomain.example.com:8080/path/file.txt")
 	if err != nil {
@@ -146,11 +123,19 @@ func main() {
 }
 ```
 
-Set a default scheme:
+You can customize how URLs are parsed by specifying default scheme, or providing custom TLDs.
 
-```go
-p := parser.NewURLParser(parser.URLParserWithDefaultScheme("https"))
-```
+* Parse URLs with default scheme:
+
+	```go
+	p := parser.NewParser(parser.WithDefaultScheme("https"))
+	```
+
+* Parse URLs with custom TLDs:
+
+	```go
+	p := parser.NewParser(parser.WithTLDs("custom", "custom2"))
+	```
 
 ## Contributing
 
