@@ -7,10 +7,6 @@ package schemes
 //
 // The list includes both officially registered schemes and commonly used unofficial schemes.
 //
-// Example Use Cases:
-// - Identifying resources without a host (e.g., local files, email, phone numbers).
-// - Handling URI schemes used for messaging, file access, and digital transactions.
-//
 // The following are some of the notable schemes without an authority component:.
 var NoAuthority = []string{
 	`bitcoin`, // Bitcoin - Used to create Bitcoin payment URIs.
