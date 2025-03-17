@@ -9,16 +9,16 @@ import (
 	"go.source.hueristiq.com/url/parser"
 )
 
-func Test_URLParser_Parse(t *testing.T) {
+func Test_Parser_Parse(t *testing.T) {
 	t.Parallel()
 
-	p := parser.NewURLParser()
+	p := parser.NewParser()
 
 	tests := []struct {
-		name              string
-		URL               string
-		expectedParsedURL *parser.URL
-		expectedErr       bool
+		name           string
+		raw            string
+		expectedParsed *parser.URL
+		expectedErr    bool
 	}{
 		{
 			"URL",
@@ -30,9 +30,9 @@ func Test_URLParser_Parse(t *testing.T) {
 					Path:   "/path",
 				},
 				Domain: &parser.Domain{
-					Subdomain: "",
-					SLD:       "example",
-					TLD:       "com",
+					Subdomain:         "",
+					SecondLevelDomain: "example",
+					TopLevelDomain:    "com",
 				},
 			},
 			false,
@@ -47,9 +47,43 @@ func Test_URLParser_Parse(t *testing.T) {
 					Path:   "/path",
 				},
 				Domain: &parser.Domain{
-					Subdomain: "www",
-					SLD:       "example",
-					TLD:       "com",
+					Subdomain:         "www",
+					SecondLevelDomain: "example",
+					TopLevelDomain:    "com",
+				},
+			},
+			false,
+		},
+		{
+			"URL with invalid TLD",
+			"https://www.example.invalidtld/path",
+			&parser.URL{
+				URL: &url.URL{
+					Scheme: "https",
+					Host:   "www.example.invalidtld",
+					Path:   "/path",
+				},
+				Domain: &parser.Domain{
+					Subdomain:         "",
+					SecondLevelDomain: "www.example.invalidtld",
+					TopLevelDomain:    "",
+				},
+			},
+			false,
+		},
+		{
+			"URL with pseudo  TLD",
+			"https://www.example.local/path",
+			&parser.URL{
+				URL: &url.URL{
+					Scheme: "https",
+					Host:   "www.example.local",
+					Path:   "/path",
+				},
+				Domain: &parser.Domain{
+					Subdomain:         "www",
+					SecondLevelDomain: "example",
+					TopLevelDomain:    "local",
 				},
 			},
 			false,
@@ -64,9 +98,9 @@ func Test_URLParser_Parse(t *testing.T) {
 					Path:   "/path",
 				},
 				Domain: &parser.Domain{
-					Subdomain: "www",
-					SLD:       "example",
-					TLD:       "com",
+					Subdomain:         "www",
+					SecondLevelDomain: "example",
+					TopLevelDomain:    "com",
 				},
 			},
 			false,
@@ -120,9 +154,9 @@ func Test_URLParser_Parse(t *testing.T) {
 					RawPath: "/w%0d%2e/",
 				},
 				Domain: &parser.Domain{
-					Subdomain: "",
-					SLD:       "example",
-					TLD:       "com",
+					Subdomain:         "",
+					SecondLevelDomain: "example",
+					TopLevelDomain:    "com",
 				},
 			},
 			false,
@@ -138,9 +172,9 @@ func Test_URLParser_Parse(t *testing.T) {
 					RawQuery: "some'param=`'+OR+ORDER+BY+1--",
 				},
 				Domain: &parser.Domain{
-					Subdomain: "",
-					SLD:       "",
-					TLD:       "",
+					Subdomain:         "",
+					SecondLevelDomain: "",
+					TopLevelDomain:    "",
 				},
 			},
 			false,
@@ -155,9 +189,90 @@ func Test_URLParser_Parse(t *testing.T) {
 					Path:   "/a/b/c/../c",
 				},
 				Domain: &parser.Domain{
-					Subdomain: "",
-					SLD:       "example",
-					TLD:       "com",
+					Subdomain:         "",
+					SecondLevelDomain: "example",
+					TopLevelDomain:    "com",
+				},
+			},
+			false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			actualParsedURL, err := p.Parse(tt.raw)
+
+			if tt.expectedErr {
+				require.Error(t, err, "Expected an error but got none")
+
+				return
+			}
+
+			assert.Equal(t, tt.expectedParsed, actualParsedURL, "Expected and actual Person structs should be equal")
+		})
+	}
+}
+
+func Test_Parser_WithDefaultScheme_Parse(t *testing.T) {
+	t.Parallel()
+
+	p := parser.NewParser(parser.WithDefaultScheme("https"))
+
+	tests := []struct {
+		name              string
+		URL               string
+		expectedParsedURL *parser.URL
+		expectedErr       bool
+	}{
+		{
+			"URL without scheme",
+			"example.com/path",
+			&parser.URL{
+				URL: &url.URL{
+					Scheme: "https",
+					Host:   "example.com",
+					Path:   "/path",
+				},
+				Domain: &parser.Domain{
+					Subdomain:         "",
+					SecondLevelDomain: "example",
+					TopLevelDomain:    "com",
+				},
+			},
+			false,
+		},
+		{
+			"URL with ://",
+			"://example.com/path",
+			&parser.URL{
+				URL: &url.URL{
+					Scheme: "https",
+					Host:   "example.com",
+					Path:   "/path",
+				},
+				Domain: &parser.Domain{
+					Subdomain:         "",
+					SecondLevelDomain: "example",
+					TopLevelDomain:    "com",
+				},
+			},
+			false,
+		},
+		{
+			"URL with scheme",
+			"http://example.com/path",
+			&parser.URL{
+				URL: &url.URL{
+					Scheme: "http",
+					Host:   "example.com",
+					Path:   "/path",
+				},
+				Domain: &parser.Domain{
+					Subdomain:         "",
+					SecondLevelDomain: "example",
+					TopLevelDomain:    "com",
 				},
 			},
 			false,
@@ -181,10 +296,10 @@ func Test_URLParser_Parse(t *testing.T) {
 	}
 }
 
-func Test_URLParser_WithDefaultScheme_Parse(t *testing.T) {
+func Test_Parser_WithTLDs_Parse(t *testing.T) {
 	t.Parallel()
 
-	p := parser.NewURLParser(parser.URLParserWithDefaultScheme("https"))
+	p := parser.NewParser(parser.WithTLDs("custom"))
 
 	tests := []struct {
 		name              string
@@ -194,51 +309,17 @@ func Test_URLParser_WithDefaultScheme_Parse(t *testing.T) {
 	}{
 		{
 			"URL without scheme",
-			"example.com/path",
+			"https://example.custom/path",
 			&parser.URL{
 				URL: &url.URL{
 					Scheme: "https",
-					Host:   "example.com",
+					Host:   "example.custom",
 					Path:   "/path",
 				},
 				Domain: &parser.Domain{
-					Subdomain: "",
-					SLD:       "example",
-					TLD:       "com",
-				},
-			},
-			false,
-		},
-		{
-			"URL with ://",
-			"://example.com/path",
-			&parser.URL{
-				URL: &url.URL{
-					Scheme: "https",
-					Host:   "example.com",
-					Path:   "/path",
-				},
-				Domain: &parser.Domain{
-					Subdomain: "",
-					SLD:       "example",
-					TLD:       "com",
-				},
-			},
-			false,
-		},
-		{
-			"URL with scheme",
-			"http://example.com/path",
-			&parser.URL{
-				URL: &url.URL{
-					Scheme: "http",
-					Host:   "example.com",
-					Path:   "/path",
-				},
-				Domain: &parser.Domain{
-					Subdomain: "",
-					SLD:       "example",
-					TLD:       "com",
+					Subdomain:         "",
+					SecondLevelDomain: "example",
+					TopLevelDomain:    "custom",
 				},
 			},
 			false,
