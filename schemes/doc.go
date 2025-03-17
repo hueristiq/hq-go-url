@@ -6,16 +6,6 @@
 // validating, and handling different types of schemes in web applications, networking tools, and other
 // software components.
 //
-// Categories:
-// - Official: Includes IANA-registered schemes, updated periodically from the official registry.
-// - Unofficial: Consists of widely used but unregistered schemes specific to certain applications or services.
-// - NoAuthority: Contains schemes that do not require an authority component and use a colon (":") instead of "://".
-//
-// Features:
-// - Maintains structured lists of URL schemes for validation and processing.
-// - Useful in security applications, protocol handlers, and URL parsing utilities.
-// - References official IANA data sources to ensure accuracy.
-//
 // Example Usage:
 //
 //	package main

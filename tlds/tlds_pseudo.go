@@ -5,11 +5,6 @@ package tlds
 // These domains are not part of the official IANA TLD registry but serve specific purposes
 // in private networks, special-use cases, or decentralized domain name systems.
 //
-// Example Use Cases:
-// - Identifying domain names used in experimental or alternative networking environments.
-// - Recognizing non-standard domain suffixes in security and network analysis.
-// - Handling domain resolution for special-use domain names.
-//
 // References:
 //   - Wikipedia: https://en.wikipedia.org/wiki/Pseudo-top-level_domain
 //   - IETF Draft: https://tools.ietf.org/html/draft-grothoff-iesg-special-use-p2p-names-00

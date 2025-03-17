@@ -141,7 +141,7 @@ func (e *Extractor) WithScheme() {
 // WithSchemePattern sets a custom regular expression pattern for matching URL schemes.
 // It also marks the Extractor as requiring a scheme.
 //
-// Arguments:
+// Parameter:
 //   - pattern (string): A regex pattern to match URL schemes.
 func (e *Extractor) WithSchemePattern(pattern string) {
 	e.WithScheme()
@@ -158,7 +158,7 @@ func (e *Extractor) WithHost() {
 // WithHostPattern sets a custom regular expression pattern for matching URL hosts.
 // It also marks the Extractor as requiring a host.
 //
-// Arguments:
+// Parameter:
 //   - pattern (string): A regex pattern to match URL hosts.
 func (e *Extractor) WithHostPattern(pattern string) {
 	e.WithHost()
@@ -344,7 +344,7 @@ var _ Interface = (*Extractor)(nil)
 // The options can be used to customize the behavior of the Extractor, such as requiring URL schemes
 // or hosts, and specifying custom regex patterns for these components.
 //
-// Arguments:
+// Parameter:
 //   - options (...Option): A variadic list of Option functions that modify the Extractor's settings.
 //
 // Returns:
@@ -371,7 +371,7 @@ func WithScheme() (option Option) {
 
 // WithSchemePattern returns an Option function that sets a custom regex pattern for matching URL schemes.
 //
-// Arguments:
+// Parameter:
 //   - pattern (string): A regex pattern to match URL schemes.
 //
 // Returns:
@@ -394,7 +394,7 @@ func WithHost() (option Option) {
 
 // WithHostPattern returns an Option function that sets a custom regex pattern for matching URL hosts.
 //
-// Arguments:
+// Parameter:
 //   - pattern (string): A regex pattern to match URL hosts.
 //
 // Returns:
@@ -409,7 +409,7 @@ func WithHostPattern(pattern string) (option Option) {
 // It joins the provided strings with a "|" (alternation) operator and escapes each string to ensure
 // special regex characters are treated literally.
 //
-// Arguments:
+// Parameter:
 //   - strs (...string): A variadic list of strings to be included in the pattern.
 //
 // Returns:

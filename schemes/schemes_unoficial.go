@@ -6,11 +6,6 @@ package schemes
 // While they may not be part of the official URI scheme registry, they are commonly used
 // for application-specific or service-specific functionalities.
 //
-// Example Use Cases:
-// - Handling custom application protocols in browsers.
-// - Recognizing unofficial URL schemes in network security and filtering.
-// - Processing and parsing custom URIs in software applications.
-//
 // Reference:
 // - https://en.wikipedia.org/wiki/List_of_URI_schemes#Unofficial_but_common_URI_schemes
 //

@@ -71,7 +71,7 @@ type DomainParser struct {
 // subdomain, root domain (SLD), and TLD. The method uses the suffix array to identify the TLD and then
 // extracts the subdomain and root domain from the rest of the domain string.
 //
-// Arguments:
+// Parameters:
 //   - domain (string): The full domain string to be parsed.
 //
 // Returns:
@@ -105,7 +105,7 @@ func (p *DomainParser) Parse(unparsed string) (parsed *Domain) {
 // WithTLDs configures the DomainParser to use a custom set of TLDs by building a new suffix array.
 // It takes a list of TLD strings, concatenates them with a separator, and builds the suffix array.
 //
-// Arguments:
+// Parameters:
 //   - TLDs (...string): A slice of custom TLDs to be used by the Parser.
 func (p *DomainParser) WithTLDs(TLDs ...string) {
 	p.sa = suffixarray.New([]byte("\x00" + strings.Join(TLDs, "\x00") + "\x00"))
@@ -117,7 +117,7 @@ func (p *DomainParser) WithTLDs(TLDs ...string) {
 //
 // This method uses the suffix array to efficiently identify known TLDs.
 //
-// Arguments:
+// Parameters:
 //   - parts ([]string): A slice of domain components split by '.' (e.g., ["www", "example", "com"]).
 //
 // Returns:
@@ -172,7 +172,7 @@ var _ DomainParserInterface = (*DomainParser)(nil)
 // of TLDs, including both standard TLDs and pseudo-TLDs. Additional options can be passed to customize
 // the parser, such as using a custom set of TLDs.
 //
-// Arguments:
+// Parameters:
 //   - options (...DomainParserOption): Optional configuration options.
 //
 // Returns:
@@ -198,7 +198,7 @@ func NewDomainParser(options ...DomainParserOption) (parser *DomainParser) {
 // This option is useful for handling non-standard or niche TLDs that may not be included
 // in the default set.
 //
-// Arguments:
+// Parameters:
 //   - TLDs (...string): A slice of custom TLDs to be used by the Parser.
 //
 // Returns:

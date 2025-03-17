@@ -6,12 +6,6 @@
 // domain registrations. Pseudo-TLDs are unofficial but widely recognized domain suffixes used in
 // specialized networks or alternative domain name systems.
 //
-// Features:
-// - Maintains an updated list of official IANA-approved TLDs.
-// - Includes effective TLDs from the Public Suffix List.
-// - Provides a categorized list of pseudo-TLDs for specialized use cases.
-// - Useful for domain name validation, parsing, classification, and security filtering.
-//
 // Example Usage:
 //
 //	package main
@@ -29,6 +23,7 @@
 // References:
 // - IANA TLDs: https://data.iana.org/TLD/tlds-alpha-by-domain.txt
 // - Public Suffix List: https://publicsuffix.org/list/public_suffix_list.dat
+// - A-Z TLDs: https://tld-list.com/tlds-from-a-z
 // - Wikipedia: https://en.wikipedia.org/wiki/Top-level_domain
 // - Pseudo-TLDs: https://en.wikipedia.org/wiki/Pseudo-top-level_domain
 package tlds
