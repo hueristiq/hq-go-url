@@ -2,28 +2,21 @@
 
 ![made with go](https://img.shields.io/badge/made%20with-Go-1E90FF.svg) [![go report card](https://goreportcard.com/badge/github.com/hueristiq/hq-go-url)](https://goreportcard.com/report/github.com/hueristiq/hq-go-url) [![open issues](https://img.shields.io/github/issues-raw/hueristiq/hq-go-url.svg?style=flat&color=1E90FF)](https://github.com/hueristiq/hq-go-url/issues?q=is:issue+is:open) [![closed issues](https://img.shields.io/github/issues-closed-raw/hueristiq/hq-go-url.svg?style=flat&color=1E90FF)](https://github.com/hueristiq/hq-go-url/issues?q=is:issue+is:closed) [![license](https://img.shields.io/badge/license-MIT-gray.svg?color=1E90FF)](https://github.com/hueristiq/hq-go-url/blob/master/LICENSE) ![maintenance](https://img.shields.io/badge/maintained%3F-yes-1E90FF.svg) [![contribution](https://img.shields.io/badge/contributions-welcome-1E90FF.svg)](https://github.com/hueristiq/hq-go-url/blob/master/CONTRIBUTING.md)
 
-`hq-go-url` is a [Go (Golang)](http://golang.org/) package for extracting, parsing, and manipulating URLs with ease. It provides powerful tools to:
-
-* Extract URLs from text using flexible, customizable regular expressions.
-* Parse URLs with extended functionality that includes detailed domain analysis—splitting a domain into its subdomain, second-level domain (SLD), and top-level domain (TLD).
-
-This package is especially useful for developers who need to work with URLs in a structured way.
+`hq-go-url` is a [Go (Golang)](http://golang.org/) package simplify working with URLs. It provides robust tools for both extracting URLs from text and parsing them into detailed components. Whether you need to identify URLs in raw text or dissect a URL into its scheme, host, port, path, and refined domain parts (subdomain, second-level domain, top-level domain), this package has you covered.
 
 ## Resources
 
-* [Features](#features)
-* [Usage](#usage)
-	* [Extraction](#extraction)
-	* [Parsing](#parsing)
-		* [Domains](#domains)
-		* [URLs](#urls)
-* [Contributing](#contributing)
-* [Licensing](#licensing)
+- [Features](#features)
+- [Usage](#usage)
+	- [Extraction](#extraction)
+	- [Parsing](#parsing)
+- [Contributing](#contributing)
+- [Licensing](#licensing)
 
 ## Features
 
-* **Configurable URL Extraction:** Extract URLs from text using regular expressions.
-* **Extended URL Parsing:** Extend the standard [`net/url`](https://pkg.go.dev/net/url) package in Go with additional fields and capabilities.
+- Configurable URL Extraction
+- Extended URL Parsing
 
 ## Usage
 
@@ -31,11 +24,9 @@ This package is especially useful for developers who need to work with URLs in a
 go get -v -u go.source.hueristiq.com/url
 ```
 
-Below are examples demonstrating how to use the different features of the `hq-go-url` package.
-
 ### Extraction
 
-The extractor package allows you to extract URLs from a block of text using regular expressions that can be customized to your needs.
+The `extractor` package lets you scan text and pull out URLs using advanced regex patterns. You can enforce URL schemes or hosts, or use custom patterns to suit your specific needs.
 
 ```go
 package main
@@ -70,7 +61,7 @@ func main() {
 
 You can customize how URLs are extracted by specifying URL schemes, hosts, or providing custom regular expression patterns.
 
-* Extract URLs with Schemes Pattern:
+- Extract URLs with Schemes Pattern:
 
 	```go
 	e := extractor.New(
@@ -80,7 +71,7 @@ You can customize how URLs are extracted by specifying URL schemes, hosts, or pr
 
 	This configuration will extract URLs with `http`, `https`, or `ftp` schemes.
 
-* Extract URLs with Host Pattern:
+- Extract URLs with Host Pattern:
 
 	```go
 	e := extractor.New(
@@ -92,6 +83,8 @@ You can customize how URLs are extracted by specifying URL schemes, hosts, or pr
 	This configuration will extract URLs that have hosts matching `www.example.com` or `example.com`.
 
 ### Parsing
+
+The `parser` package extends Go's `net/url` package to include detailed domain breakdown. It extracts the subdomain, SLD, and TLD, making URL analysis more precise.
 
 ```go
 package main
@@ -125,13 +118,13 @@ func main() {
 
 You can customize how URLs are parsed by specifying default scheme, or providing custom TLDs.
 
-* Parse URLs with default scheme:
+- Parse URLs with default scheme:
 
 	```go
 	p := parser.NewParser(parser.WithDefaultScheme("https"))
 	```
 
-* Parse URLs with custom TLDs:
+- Parse URLs with custom TLDs:
 
 	```go
 	p := parser.NewParser(parser.WithTLDs("custom", "custom2"))
