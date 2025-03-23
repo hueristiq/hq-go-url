@@ -7,6 +7,7 @@
 ## Resources
 
 - [Features](#features)
+- [Installation](#installation)
 - [Usage](#usage)
 	- [Extraction](#extraction)
 	- [Parsing](#parsing)
@@ -15,14 +16,20 @@
 
 ## Features
 
-- Configurable URL Extraction
-- Extended URL Parsing
+- **Configurable URL Extraction:** Easily scan text using advanced regular expression patterns to pull out valid URLs.
+- **Extended URL Parsing:** Enhance the standard Go `net/url` package with extra functionality to break down URLs into granular components.
 
-## Usage
+## Installation
+
+To install `hq-go-url`, run:
 
 ```bash
 go get -v -u go.source.hueristiq.com/url
 ```
+
+Make sure your Go environment is set up properly (Go 1.x or later is recommended).
+
+## Usage
 
 ### Extraction
 
@@ -39,15 +46,12 @@ import (
 )
 
 func main() {
-    // Create a new extractor with the requirement that URLs include a scheme.
     ex := extractor.New(extractor.WithScheme())
 
-    // Compile the regular expression used for URL extraction.
     regex := ex.CompileRegex()
 
     text := "Visit our website at https://www.example.com or contact us at info@example.com."
 
-    // Extract all matching URLs from the text.
     urls := regex.FindAllString(text, -1)
 
     fmt.Println("Extracted URLs:")
@@ -132,9 +136,9 @@ You can customize how URLs are parsed by specifying default scheme, or providing
 
 ## Contributing
 
-Feel free to submit [Pull Requests](https://github.com/hueristiq/hq-go-url/pulls) or report [Issues](https://github.com/hueristiq/hq-go-url/issues). For more details, check out the [contribution guidelines](https://github.com/hueristiq/hq-go-url/blob/master/CONTRIBUTING.md).
+Contributions are welcome and encouraged! Feel free to submit [Pull Requests](https://github.com/hueristiq/hq-go-url/pulls) or report [Issues](https://github.com/hueristiq/hq-go-url/issues). For more details, check out the [contribution guidelines](https://github.com/hueristiq/hq-go-url/blob/master/CONTRIBUTING.md).
 
-Huge thanks to the [contributors](https://github.com/hueristiq/hq-go-url/graphs/contributors) thus far!
+A big thank you to all the [contributors](https://github.com/hueristiq/hq-go-url/graphs/contributors) for your support!
 
 ![contributors](https://contrib.rocks/image?repo=hueristiq/hq-go-url&max=500)
 
