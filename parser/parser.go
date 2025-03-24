@@ -207,7 +207,7 @@ func (p *Parser) findTLDOffset(parts []string) (offset int) {
 //
 // Example usage:
 //
-//	parser := NewParser(WithDefaultScheme("https"))
+//	parser := New(WithDefaultScheme("https"))
 type Option func(parser *Parser)
 
 // Interface defines the standard interface for URL parsing functionality. Any type that implements
@@ -219,7 +219,7 @@ type Interface interface {
 // Ensure that Parser implements the Interface.
 var _ Interface = (*Parser)(nil)
 
-// NewParser creates and initializes a new Parser instance with default settings. It builds a suffix
+// New creates and initializes a new Parser instance with default settings. It builds a suffix
 // array using a default set of TLDs from the imported tlds package. Additional configurations can
 // be applied via the provided Option functions.
 //
@@ -228,7 +228,7 @@ var _ Interface = (*Parser)(nil)
 //
 // Returns:
 //   - parser (*Parser): A pointer to the newly created Parser instance.
-func NewParser(options ...Option) (parser *Parser) {
+func New(options ...Option) (parser *Parser) {
 	parser = &Parser{}
 
 	TLDs := []string{}

@@ -12,7 +12,7 @@ import (
 func Test_Parser_Parse(t *testing.T) {
 	t.Parallel()
 
-	p := parser.NewParser()
+	p := parser.New()
 
 	tests := []struct {
 		name           string
@@ -218,7 +218,7 @@ func Test_Parser_Parse(t *testing.T) {
 func Test_Parser_WithDefaultScheme_Parse(t *testing.T) {
 	t.Parallel()
 
-	p := parser.NewParser(parser.WithDefaultScheme("https"))
+	p := parser.New(parser.WithDefaultScheme("https"))
 
 	tests := []struct {
 		name              string
@@ -299,7 +299,7 @@ func Test_Parser_WithDefaultScheme_Parse(t *testing.T) {
 func Test_Parser_WithTLDs_Parse(t *testing.T) {
 	t.Parallel()
 
-	p := parser.NewParser(parser.WithTLDs("custom"))
+	p := parser.New(parser.WithTLDs("custom"))
 
 	tests := []struct {
 		name              string
