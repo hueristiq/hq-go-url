@@ -100,7 +100,7 @@ import (
 )
 
 func main() {
-	p := parser.NewParser()
+	p := parser.New()
 
 	parsed, err := p.Parse("https://subdomain.example.com:8080/path/file.txt")
 	if err != nil {
@@ -125,20 +125,20 @@ You can customize how URLs are parsed by specifying default scheme, or providing
 - Parse URLs with default scheme:
 
 	```go
-	p := parser.NewParser(parser.WithDefaultScheme("https"))
+	p := parser.New(parser.WithDefaultScheme("https"))
 	```
 
 - Parse URLs with custom TLDs:
 
 	```go
-	p := parser.NewParser(parser.WithTLDs("custom", "custom2"))
+	p := parser.New(parser.WithTLDs("custom", "custom2"))
 	```
 
 ## Contributing
 
 Contributions are welcome and encouraged! Feel free to submit [Pull Requests](https://github.com/hueristiq/hq-go-url/pulls) or report [Issues](https://github.com/hueristiq/hq-go-url/issues). For more details, check out the [contribution guidelines](https://github.com/hueristiq/hq-go-url/blob/master/CONTRIBUTING.md).
 
-A big thank you to all the [contributors](https://github.com/hueristiq/hq-go-url/graphs/contributors) for your support!
+A big thank you to all the [contributors](https://github.com/hueristiq/hq-go-url/graphs/contributors) for your ongoing support!
 
 ![contributors](https://contrib.rocks/image?repo=hueristiq/hq-go-url&max=500)
 
