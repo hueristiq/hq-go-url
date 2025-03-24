@@ -100,7 +100,7 @@ import (
 )
 
 func main() {
-	p := parser.NewParser()
+	p := parser.New()
 
 	parsed, err := p.Parse("https://subdomain.example.com:8080/path/file.txt")
 	if err != nil {
@@ -125,13 +125,13 @@ You can customize how URLs are parsed by specifying default scheme, or providing
 - Parse URLs with default scheme:
 
 	```go
-	p := parser.NewParser(parser.WithDefaultScheme("https"))
+	p := parser.New(parser.WithDefaultScheme("https"))
 	```
 
 - Parse URLs with custom TLDs:
 
 	```go
-	p := parser.NewParser(parser.WithTLDs("custom", "custom2"))
+	p := parser.New(parser.WithTLDs("custom", "custom2"))
 	```
 
 ## Contributing
