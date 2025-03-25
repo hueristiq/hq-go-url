@@ -113,8 +113,8 @@ func main() {
 	fmt.Printf("Host: %s\n", parsed.Host)
 	fmt.Printf("Hostname: %s\n", parsed.Hostname())
 	fmt.Printf("Subdomain: %s\n", parsed.Domain.Subdomain)
-	fmt.Printf("SLD: %s\n", parsed.Domain.SLD)
-	fmt.Printf("TLD: %s\n", parsed.Domain.TLD)
+	fmt.Printf("SLD: %s\n", parsed.Domain.SecondLevelDomain)
+	fmt.Printf("TLD: %s\n", parsed.Domain.TopLevelDomain)
 	fmt.Printf("Port: %s\n", parsed.Port())
 	fmt.Printf("Path: %s\n", parsed.Path)
 }
