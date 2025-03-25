@@ -17,7 +17,7 @@
 ## Features
 
 - **Configurable URL Extraction:** Easily scan text using advanced regular expression patterns to pull out valid URLs.
-- **Extended URL Parsing:** Enhance the standard Go `net/url` package with extra functionality to break down URLs into granular components.
+- **Extended URL Parsing:** Enhance [`net/url`](https://pkg.go.dev/net/url) package to break down URLs into granular components.
 
 ## Installation
 
