@@ -17,7 +17,7 @@
 ## Features
 
 - **Configurable URL Extraction:** Easily scan text using advanced regular expression patterns to pull out valid URLs.
-- **Extended URL Parsing:** Enhance the standard Go `net/url` package with extra functionality to break down URLs into granular components.
+- **Extended URL Parsing:** Enhance [`net/url`](https://pkg.go.dev/net/url) package to break down URLs into granular components.
 
 ## Installation
 
@@ -113,8 +113,8 @@ func main() {
 	fmt.Printf("Host: %s\n", parsed.Host)
 	fmt.Printf("Hostname: %s\n", parsed.Hostname())
 	fmt.Printf("Subdomain: %s\n", parsed.Domain.Subdomain)
-	fmt.Printf("SLD: %s\n", parsed.Domain.SLD)
-	fmt.Printf("TLD: %s\n", parsed.Domain.TLD)
+	fmt.Printf("SLD: %s\n", parsed.Domain.SecondLevelDomain)
+	fmt.Printf("TLD: %s\n", parsed.Domain.TopLevelDomain)
 	fmt.Printf("Port: %s\n", parsed.Port())
 	fmt.Printf("Path: %s\n", parsed.Path)
 }
