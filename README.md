@@ -2,7 +2,7 @@
 
 ![made with go](https://img.shields.io/badge/made%20with-Go-1E90FF.svg) [![go report card](https://goreportcard.com/badge/github.com/hueristiq/hq-go-url)](https://goreportcard.com/report/github.com/hueristiq/hq-go-url) [![open issues](https://img.shields.io/github/issues-raw/hueristiq/hq-go-url.svg?style=flat&color=1E90FF)](https://github.com/hueristiq/hq-go-url/issues?q=is:issue+is:open) [![closed issues](https://img.shields.io/github/issues-closed-raw/hueristiq/hq-go-url.svg?style=flat&color=1E90FF)](https://github.com/hueristiq/hq-go-url/issues?q=is:issue+is:closed) [![license](https://img.shields.io/badge/license-MIT-gray.svg?color=1E90FF)](https://github.com/hueristiq/hq-go-url/blob/master/LICENSE) ![maintenance](https://img.shields.io/badge/maintained%3F-yes-1E90FF.svg) [![contribution](https://img.shields.io/badge/contributions-welcome-1E90FF.svg)](https://github.com/hueristiq/hq-go-url/blob/master/CONTRIBUTING.md)
 
-`hq-go-url` is a [Go (Golang)](http://golang.org/) package simplify working with URLs. It provides robust tools for both extracting URLs from text and parsing them into detailed components. Whether you need to identify URLs in raw text or dissect a URL into its scheme, host, port, path, and refined domain parts (subdomain, second-level domain, top-level domain), this package has you covered.
+`hq-go-url` is a [Go (Golang)](http://golang.org/) package for working with URLs. It provides robust tools for extracting URLs from text and parsing them into granular components.
 
 ## Resources
 
@@ -16,8 +16,8 @@
 
 ## Features
 
-- **Configurable URL Extraction:** Easily scan text using advanced regular expression patterns to pull out valid URLs.
-- **Extended URL Parsing:** Enhance [`net/url`](https://pkg.go.dev/net/url) package to break down URLs into granular components.
+- **URL Extraction:** Utilizes advanced regular expression patterns to scan and extract valid URLs from any text. 
+- **URL Parsing:** Extends [`net/url`](https://pkg.go.dev/net/url) parser to break down URLs into granular components.
 
 ## Installation
 
@@ -33,7 +33,7 @@ Make sure your Go environment is set up properly (Go 1.x or later is recommended
 
 ### Extraction
 
-The `extractor` package lets you scan text and pull out URLs using advanced regex patterns. You can enforce URL schemes or hosts, or use custom patterns to suit your specific needs.
+The `extractor` package lets you scan text and pull out URLs using advanced regex patterns.
 
 ```go
 package main
@@ -46,11 +46,11 @@ import (
 )
 
 func main() {
-    ex := extractor.New(extractor.WithScheme())
+    e := extractor.New(extractor.WithScheme())
 
-    regex := ex.CompileRegex()
+    regex := e.CompileRegex()
 
-    text := "Visit our website at https://www.example.com or contact us at info@example.com."
+    text := "Check these out: ftp://ftp.example.com, https://secure.example.com, and mailto:someone@example.com."
 
     urls := regex.FindAllString(text, -1)
 
@@ -88,7 +88,7 @@ You can customize how URLs are extracted by specifying URL schemes, hosts, or pr
 
 ### Parsing
 
-The `parser` package extends Go's `net/url` package to include detailed domain breakdown. It extracts the subdomain, SLD, and TLD, making URL analysis more precise.
+The `parser` package extends Go's `net/url` package to include detailed domain breakdown.
 
 ```go
 package main
@@ -109,14 +109,14 @@ func main() {
 		return
 	}
 
-	fmt.Printf("Scheme: %s\n", parsed.Scheme)
-	fmt.Printf("Host: %s\n", parsed.Host)
-	fmt.Printf("Hostname: %s\n", parsed.Hostname())
-	fmt.Printf("Subdomain: %s\n", parsed.Domain.Subdomain)
-	fmt.Printf("SLD: %s\n", parsed.Domain.SecondLevelDomain)
-	fmt.Printf("TLD: %s\n", parsed.Domain.TopLevelDomain)
-	fmt.Printf("Port: %s\n", parsed.Port())
-	fmt.Printf("Path: %s\n", parsed.Path)
+    fmt.Printf("Scheme: %s\n", parsed.Scheme)
+    fmt.Printf("Host: %s\n", parsed.Host)
+    fmt.Printf("Hostname: %s\n", parsed.Hostname())
+    fmt.Printf("Subdomain: %s\n", parsed.Domain.Subdomain)
+    fmt.Printf("Second-Level Domain (SLD): %s\n", parsed.Domain.SecondLevelDomain)
+    fmt.Printf("Top-Level Domain (TLD): %s\n", parsed.Domain.TopLevelDomain)
+    fmt.Printf("Port: %s\n", parsed.Port())
+    fmt.Printf("Path: %s\n", parsed.Path)
 }
 ```
 
