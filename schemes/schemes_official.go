@@ -36,6 +36,7 @@ var Official = []string{
 	"beshare",
 	"bitcoin",
 	"bitcoincash",
+	"bl",
 	"blob",
 	"bluetooth",
 	"bolo",
