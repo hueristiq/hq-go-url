@@ -8,7 +8,7 @@
 //
 //	import (
 //	    "fmt"
-//	    "go.source.hueristiq.com/url/unicodes"
+//	    "github.com/hueristiq/hq-go-url/unicodes"
 //	)
 //
 //	func main() {

@@ -15,7 +15,7 @@
 //
 //	import (
 //	    "fmt"
-//	    "go.source.hueristiq.com/url/extractor"
+//	    "github.com/hueristiq/hq-go-url/extractor"
 //	)
 //
 //	func main() {

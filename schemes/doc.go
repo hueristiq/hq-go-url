@@ -12,7 +12,7 @@
 //
 //	import (
 //	    "fmt"
-//	    "go.source.hueristiq.com/url/schemes"
+//	    "github.com/hueristiq/hq-go-url/schemes"
 //	)
 //
 //	func main() {
