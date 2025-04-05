@@ -24,7 +24,7 @@
 To install `hq-go-url`, run:
 
 ```bash
-go get -v -u go.source.hueristiq.com/url
+go get -v -u github.com/hueristiq/hq-go-url
 ```
 
 Make sure your Go environment is set up properly (Go 1.x or later is recommended).
@@ -42,7 +42,7 @@ import (
     "fmt"
     "log"
 
-    "go.source.hueristiq.com/url/extractor"
+    "github.com/hueristiq/hq-go-url/extractor"
 )
 
 func main() {
@@ -96,7 +96,7 @@ package main
 import (
 	"fmt"
 
-	"go.source.hueristiq.com/url/parser"
+	"github.com/hueristiq/hq-go-url/parser"
 )
 
 func main() {

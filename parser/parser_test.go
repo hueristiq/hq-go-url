@@ -4,9 +4,9 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/hueristiq/hq-go-url/parser"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.source.hueristiq.com/url/parser"
 )
 
 func Test_Parser_Parse(t *testing.T) {

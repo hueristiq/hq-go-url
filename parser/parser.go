@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"strings"
 
-	"go.source.hueristiq.com/url/tlds"
+	"github.com/hueristiq/hq-go-url/tlds"
 )
 
 // URL extends the standard net/url.URL struct by embedding it and adding additional domain-related
