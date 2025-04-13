@@ -5576,6 +5576,7 @@ var Official = []string{
 	"secure",
 	"security",
 	"seek",
+	"seg.ar",
 	"seg.br",
 	"seihi.nagasaki.jp",
 	"seika.kyoto.jp",
