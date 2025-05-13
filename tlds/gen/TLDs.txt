@@ -152,7 +152,6 @@ org.az
 pp.az
 pro.az
 azure
-b</h2
 ba
 co.ba
 com.ba
@@ -636,7 +635,6 @@ cymru
 cyou
 cz
 co.cz
-d</h2
 dad
 dance
 data
