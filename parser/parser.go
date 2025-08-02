@@ -1,12 +1,12 @@
 package parser
 
 import (
-	"fmt"
 	"index/suffixarray"
 	"net"
 	"net/url"
 	"strings"
 
+	hqgoerrors "github.com/hueristiq/hq-go-errors"
 	"github.com/hueristiq/hq-go-url/tlds"
 )
 
@@ -115,7 +115,7 @@ func (p *Parser) Parse(raw string) (parsed *URL, err error) {
 
 	parsed.URL, err = url.Parse(raw)
 	if err != nil {
-		err = fmt.Errorf("error parsing URL: %w", err)
+		err = hqgoerrors.Wrap(err, "failed to parse URL")
 
 		return
 	}
@@ -202,13 +202,9 @@ func (p *Parser) findTLDOffset(parts []string) (offset int) {
 	return
 }
 
-// Option defines a function type used for configuring a Parser instance. Options allow customization
+// OptionFunc defines a function type used for configuring a Parser instance. Options allow customization
 // of the Parser (e.g., setting a default scheme or custom TLDs) during initialization.
-//
-// Example usage:
-//
-//	parser := New(WithDefaultScheme("https"))
-type Option func(parser *Parser)
+type OptionFunc func(parser *Parser)
 
 // Interface defines the standard interface for URL parsing functionality. Any type that implements
 // this interface must provide a Parse method to convert a raw URL string into a parsed URL struct.
@@ -221,14 +217,14 @@ var _ Interface = (*Parser)(nil)
 
 // New creates and initializes a new Parser instance with default settings. It builds a suffix
 // array using a default set of TLDs from the imported tlds package. Additional configurations can
-// be applied via the provided Option functions.
+// be applied via the provided OptionFunc functions.
 //
 // Parameters:
-//   - options (...Option): A variadic list of Option functions to configure the Parser.
+//   - ofs (...OptionFunc): A variadic list of OptionFunc functions to configure the Parser.
 //
 // Returns:
 //   - parser (*Parser): A pointer to the newly created Parser instance.
-func New(options ...Option) (parser *Parser) {
+func New(ofs ...OptionFunc) (parser *Parser) {
 	parser = &Parser{}
 
 	TLDs := []string{}
@@ -238,37 +234,37 @@ func New(options ...Option) (parser *Parser) {
 
 	parser.sa = suffixarray.New([]byte("\x00" + strings.Join(TLDs, "\x00") + "\x00"))
 
-	for _, option := range options {
-		option(parser)
+	for _, f := range ofs {
+		f(parser)
 	}
 
 	return
 }
 
-// WithDefaultScheme returns an Option that sets the default scheme for the Parser. This option
+// WithDefaultScheme returns an OptionFunc that sets the default scheme for the Parser. This option
 // ensures that URLs missing a scheme are treated as absolute URLs with the specified scheme.
 //
 // Parameters:
 //   - scheme (string): The default scheme to set (e.g., "http", "https").
 //
 // Returns:
-//   - option (Option): An Option function that applies the default scheme to a Parser instance.
-func WithDefaultScheme(scheme string) (option Option) {
-	return func(p *Parser) {
-		p.WithDefaultScheme(scheme)
+//   - (OptionFunc): An OptionFunc function that applies the default scheme to a Parser instance.
+func WithDefaultScheme(scheme string) OptionFunc {
+	return func(parser *Parser) {
+		parser.WithDefaultScheme(scheme)
 	}
 }
 
-// WithTLDs returns an Option that configures the Parser with a custom set of TLDs. This is useful
+// WithTLDs returns an OptionFunc that configures the Parser with a custom set of TLDs. This is useful
 // for handling non-standard or niche TLDs that may not be included in the default set.
 //
 // Parameters:
 //   - TLDs (...string): A slice of custom TLD strings to be used by the Parser.
 //
 // Returns:
-//   - option (Option): An Option function that applies the custom TLDs to the Parser.
-func WithTLDs(TLDs ...string) (option Option) {
-	return func(p *Parser) {
-		p.WithTLDs(TLDs...)
+//   - (OptionFunc): An OptionFunc function that applies the custom TLDs to the Parser.
+func WithTLDs(TLDs ...string) OptionFunc {
+	return func(parser *Parser) {
+		parser.WithTLDs(TLDs...)
 	}
 }

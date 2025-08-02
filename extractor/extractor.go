@@ -166,10 +166,10 @@ func (e *Extractor) WithHostPattern(pattern string) {
 	e.withHostPattern = pattern
 }
 
-// Option defines a functional option for configuring an Extractor instance.
+// OptionFunc defines a functional option for configuring an Extractor instance.
 // It allows the caller to pass in configuration functions that modify the Extractor's
 // settings (e.g., requiring a scheme or host, or providing custom regex patterns).
-type Option func(extractor *Extractor)
+type OptionFunc func(extractor *Extractor)
 
 // Interface defines the behavior that an Extractor must implement.
 // It requires the implementation of a method to compile a regular expression for URL extraction.
@@ -345,63 +345,63 @@ var _ Interface = (*Extractor)(nil)
 // or hosts, and specifying custom regex patterns for these components.
 //
 // Parameter:
-//   - options (...Option): A variadic list of Option functions that modify the Extractor's settings.
+//   - ofs (...OptionFunc): A variadic list of OptionFunc functions that modify the Extractor's settings.
 //
 // Returns:
 //   - extractor (*Extractor): A pointer to the configured Extractor instance.
-func New(options ...Option) (extractor *Extractor) {
+func New(ofs ...OptionFunc) (extractor *Extractor) {
 	extractor = &Extractor{}
 
-	for _, option := range options {
-		option(extractor)
+	for _, f := range ofs {
+		f(extractor)
 	}
 
 	return
 }
 
-// WithScheme returns an Option function that configures the Extractor to require URL schemes in the extraction process.
+// WithScheme returns an OptionFunc function that configures the Extractor to require URL schemes in the extraction process.
 //
 // Returns:
-//   - option (Option): A function that sets the withScheme flag to true.
-func WithScheme() (option Option) {
-	return func(e *Extractor) {
-		e.WithScheme()
+//   - (OptionFunc): A function that sets the withScheme flag to true.
+func WithScheme() OptionFunc {
+	return func(extractor *Extractor) {
+		extractor.WithScheme()
 	}
 }
 
-// WithSchemePattern returns an Option function that sets a custom regex pattern for matching URL schemes.
+// WithSchemePattern returns an OptionFunc function that sets a custom regex pattern for matching URL schemes.
 //
 // Parameter:
 //   - pattern (string): A regex pattern to match URL schemes.
 //
 // Returns:
-//   - option (Option): A function that sets the custom scheme pattern and enables the withScheme flag.
-func WithSchemePattern(pattern string) (option Option) {
-	return func(e *Extractor) {
-		e.WithSchemePattern(pattern)
+//   - (OptionFunc): A function that sets the custom scheme pattern and enables the withScheme flag.
+func WithSchemePattern(pattern string) OptionFunc {
+	return func(extractor *Extractor) {
+		extractor.WithSchemePattern(pattern)
 	}
 }
 
-// WithHost returns an Option function that configures the Extractor to require URL hosts in the extraction process.
+// WithHost returns an OptionFunc function that configures the Extractor to require URL hosts in the extraction process.
 //
 // Returns:
-//   - option (Option): A function that sets the withHost flag to true.
-func WithHost() (option Option) {
-	return func(e *Extractor) {
-		e.WithHost()
+//   - (OptionFunc): A function that sets the withHost flag to true.
+func WithHost() OptionFunc {
+	return func(extractor *Extractor) {
+		extractor.WithHost()
 	}
 }
 
-// WithHostPattern returns an Option function that sets a custom regex pattern for matching URL hosts.
+// WithHostPattern returns an OptionFunc function that sets a custom regex pattern for matching URL hosts.
 //
 // Parameter:
 //   - pattern (string): A regex pattern to match URL hosts.
 //
 // Returns:
-//   - option (Option): A function that sets the custom host pattern and enables the withHost flag.
-func WithHostPattern(pattern string) (option Option) {
-	return func(e *Extractor) {
-		e.WithHostPattern(pattern)
+//   - (OptionFunc): A function that sets the custom host pattern and enables the withHost flag.
+func WithHostPattern(pattern string) OptionFunc {
+	return func(extractor *Extractor) {
+		extractor.WithHostPattern(pattern)
 	}
 }
 
