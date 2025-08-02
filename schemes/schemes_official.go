@@ -377,6 +377,8 @@ var Official = []string{
 	"vsls",
 	"w3",
 	"wais",
+	"wasm",
+	"wasm-js",
 	"web3",
 	"wcr",
 	"webcal",
