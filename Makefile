@@ -4,10 +4,13 @@ SHELL = /bin/sh
 # --- Setup ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-.PHONY: install-lefthook
+.PHONY: install-lefthook install-golangci-lint
 
 install-lefthook:
 	(command -v lefthook || go install github.com/evilmartians/lefthook@latest) && lefthook install
+
+install-golangci-lint:
+	command -v golangci-lint || go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.0.2
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # --- Go (Golang) ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -28,8 +31,8 @@ go-mod-update:
 go-generate:
 	go generate ./...
 
-go-fmt:
-	(command -v golangci-lint || go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.0.2) && golangci-lint fmt ./...
+go-fmt: install-golangci-lint
+	golangci-lint fmt ./...
 
 go-lint: go-fmt
 	golangci-lint run ./...
@@ -48,7 +51,8 @@ help:
 	@echo ""
 	@echo " Setup:"
 	@echo ""
-	@echo "  install-lefthook ............... Install lefthook (Git hooks manager)."
+	@echo "  install-lefthook .............. Install lefthook."
+	@echo "  install-golangci-lint ......... Install golangci-lint."
 	@echo ""
 	@echo " Go (Golang):"
 	@echo ""
