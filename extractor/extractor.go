@@ -132,26 +132,26 @@ func (e *Extractor) CompileRegex() (regex *regexp.Regexp) {
 	return
 }
 
-// WithScheme sets the Extractor to require URL schemes during extraction.
+// SetScheme sets the Extractor to require URL schemes during extraction.
 // It marks the withScheme flag as true.
-func (e *Extractor) WithScheme() {
+func (e *Extractor) SetScheme() {
 	e.withScheme = true
 }
 
-// WithSchemePattern sets a custom regular expression pattern for matching URL schemes.
+// SetSchemePattern sets a custom regular expression pattern for matching URL schemes.
 // It also marks the Extractor as requiring a scheme.
 //
 // Parameter:
 //   - pattern (string): A regex pattern to match URL schemes.
-func (e *Extractor) WithSchemePattern(pattern string) {
-	e.WithScheme()
+func (e *Extractor) SetSchemePattern(pattern string) {
+	e.SetScheme()
 
 	e.withSchemePattern = pattern
 }
 
 // WithHost sets the Extractor to require URL hosts during extraction.
 // It marks the withHost flag as true.
-func (e *Extractor) WithHost() {
+func (e *Extractor) SetHost() {
 	e.withHost = true
 }
 
@@ -160,8 +160,8 @@ func (e *Extractor) WithHost() {
 //
 // Parameter:
 //   - pattern (string): A regex pattern to match URL hosts.
-func (e *Extractor) WithHostPattern(pattern string) {
-	e.WithHost()
+func (e *Extractor) SetHostPattern(pattern string) {
+	e.SetHost()
 
 	e.withHostPattern = pattern
 }
@@ -365,7 +365,7 @@ func New(ofs ...OptionFunc) (extractor *Extractor) {
 //   - (OptionFunc): A function that sets the withScheme flag to true.
 func WithScheme() OptionFunc {
 	return func(extractor *Extractor) {
-		extractor.WithScheme()
+		extractor.SetScheme()
 	}
 }
 
@@ -378,7 +378,7 @@ func WithScheme() OptionFunc {
 //   - (OptionFunc): A function that sets the custom scheme pattern and enables the withScheme flag.
 func WithSchemePattern(pattern string) OptionFunc {
 	return func(extractor *Extractor) {
-		extractor.WithSchemePattern(pattern)
+		extractor.SetSchemePattern(pattern)
 	}
 }
 
@@ -388,7 +388,7 @@ func WithSchemePattern(pattern string) OptionFunc {
 //   - (OptionFunc): A function that sets the withHost flag to true.
 func WithHost() OptionFunc {
 	return func(extractor *Extractor) {
-		extractor.WithHost()
+		extractor.SetHost()
 	}
 }
 
@@ -401,7 +401,7 @@ func WithHost() OptionFunc {
 //   - (OptionFunc): A function that sets the custom host pattern and enables the withHost flag.
 func WithHostPattern(pattern string) OptionFunc {
 	return func(extractor *Extractor) {
-		extractor.WithHostPattern(pattern)
+		extractor.SetHostPattern(pattern)
 	}
 }
 
