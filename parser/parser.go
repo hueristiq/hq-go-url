@@ -77,27 +77,27 @@ type Parser struct {
 	sa *suffixarray.Index
 }
 
-// WithDefaultScheme sets the default scheme for the Parser. This scheme is applied to URL strings
+// SetDefaultScheme sets the default scheme for the Parser. This scheme is applied to URL strings
 // that do not already include a scheme.
 //
 // Parameters:
 //   - scheme (string): The default scheme to use (e.g., "http", "https").
-func (p *Parser) WithDefaultScheme(scheme string) {
+func (p *Parser) SetDefaultScheme(scheme string) {
 	p.scheme = scheme
 }
 
-// WithTLDs configures the Parser to use a custom set of TLDs by building a new suffix array.
+// SetTLDs configures the Parser to use a custom set of TLDs by building a new suffix array.
 // It concatenates the provided TLD strings with a delimiter and initializes the suffix array for lookups.
 //
 // Parameters:
 //   - TLDs (...string): A slice of custom TLD strings to be used by the Parser.
-func (p *Parser) WithTLDs(TLDs ...string) {
+func (p *Parser) SetTLDs(TLDs ...string) {
 	p.sa = suffixarray.New([]byte("\x00" + strings.Join(TLDs, "\x00") + "\x00"))
 }
 
 // Parse converts a raw URL string into a URL struct that encapsulates both the standard URL
 // components (parsed by net/url) and the extracted domain components. If a default scheme has
-// been set (via WithDefaultScheme), it is applied to the raw URL string if missing. The host part
+// been set (via SetDefaultScheme), it is applied to the raw URL string if missing. The host part
 // of the URL is further processed to extract the subdomain, SLD, and TLD using a suffix array.
 //
 // Parameters:
@@ -251,7 +251,7 @@ func New(ofs ...OptionFunc) (parser *Parser) {
 //   - (OptionFunc): An OptionFunc function that applies the default scheme to a Parser instance.
 func WithDefaultScheme(scheme string) OptionFunc {
 	return func(parser *Parser) {
-		parser.WithDefaultScheme(scheme)
+		parser.SetDefaultScheme(scheme)
 	}
 }
 
@@ -265,6 +265,6 @@ func WithDefaultScheme(scheme string) OptionFunc {
 //   - (OptionFunc): An OptionFunc function that applies the custom TLDs to the Parser.
 func WithTLDs(TLDs ...string) OptionFunc {
 	return func(parser *Parser) {
-		parser.WithTLDs(TLDs...)
+		parser.SetTLDs(TLDs...)
 	}
 }
