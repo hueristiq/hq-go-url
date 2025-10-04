@@ -1,12 +1,12 @@
 package parser
 
 import (
+	"fmt"
 	"index/suffixarray"
 	"net"
 	"net/url"
 	"strings"
 
-	hqgoerrors "github.com/hueristiq/hq-go-errors"
 	"github.com/hueristiq/hq-go-url/tlds"
 )
 
@@ -115,7 +115,7 @@ func (p *Parser) Parse(raw string) (parsed *URL, err error) {
 
 	parsed.URL, err = url.Parse(raw)
 	if err != nil {
-		err = hqgoerrors.Wrap(err, "failed to parse URL")
+		err = fmt.Errorf("failed to parse URL: %w", err)
 
 		return
 	}
